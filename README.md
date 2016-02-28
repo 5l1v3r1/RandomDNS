@@ -1,6 +1,6 @@
 ![RandomDNS](https://raw.githubusercontent.com/pwnsdx/RandomDNS/master/screenshot.jpg)
 
-RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server at runtime.
+RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server.
 
 #### Features
 

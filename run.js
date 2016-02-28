@@ -4,7 +4,7 @@
  *  / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \  
  * /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
  *
- * Version: 1.0 (Alpha)
+ * Version: 1.1 (Alpha)
  * Author: Sabri Haddouche <sabri@riseup.net>
  *
  * This project is my first project who use ES6 so please be kind with critics!
@@ -213,7 +213,7 @@ class randomDNS {
                 });
             };
             
-            // Run DNSCrypt proxy with the random provider
+            // Run DNSCrypt proxy
             runDNSCrypt();
         });
     }
