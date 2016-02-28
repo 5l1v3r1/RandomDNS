@@ -53,40 +53,40 @@ const RANDOMDNS_NAME = 0,
 
 class randomDNS {
     
-    constructor(dnscryptFile, serverListFile) {
+    constructor() {
         
         // Splash
         console.log(new Buffer('DQogICBfX18gICAgICAgICAgICAgICBfXyAgICAgICAgICAgX19fICBfICBfX19fX18NCiAgLyBfIFxfX18gX19fXyAgX19fLyAvX18gIF9fIF8gIC8gXyBcLyB8LyAvIF9fLw0KIC8gLCBfLyBfIGAvIF8gXC8gXyAgLyBfIFwvICAnIFwvIC8vIC8gICAgL1wgXCAgDQovXy98X3xcXyxfL18vL18vXF8sXy9cX19fL18vXy9fL19fX18vXy98Xy9fX18vICANCg==', 'base64').toString('ascii'));
         
         cli.version(require('./package.json').version)
             .usage('[options] [file]')
-            .option('-I, --listenOn [string]', '[NOT WORKING] Listen on a specific interface/port [127.0.0.1:53]', '127.0.0.1:53')
+            .option('-I, --listenOn [string]', 'Listen on a specific interface/port [127.0.0.1:53]', '127.0.0.1:53')
+            .option('-R, --rotationTime [int]', 'Define the time to wait before rotating the server (in seconds) [600 seconds]', 600)
             .option('-P, --reverseProxy [bool]', '[NOT WORKING] Enable reverse proxy [true]', true)
             .option('-C, --inMemoryCaching [bool]', '[NOT WORKING] Enable in-memory DNS caching and hashing with Consistent Hashing (only if --reverseProxy is enabled) [true]', true)
             .option('-B, --loadBalancing [bool]', '[NOT WORKING] Do load balancing (only if --reverseProxy is enabled) [true]', true)
             .option('-T, --threads [int]', '[NOT WORKING] Number of childs to spawn (only if --loadBalancing is activated) [4]', 4)
-            .option('-R, --rotationTime [int]', '[NOT WORKING] Define the time to wait before rotating the server (in seconds) [600]', 600)
             .option('-H, --healthCheck [int]', '[NOT WORKING] Set a children timeout if not responding anymore [10 seconds]', 10)
             .option('-F, --filters [object]', '[NOT WORKING] Use filters [{IPv6: false}]', {IPv6: false})
             .option('--filters-help', '[NOT WORKING] Get full list of available filters.')
-            .option('--binaryFile [string]', '[NOT WORKING] Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
-            .option('--binaryFileSignature [string]', '[NOT WORKING] SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
-            .option('--resolverListFile [string]', '[NOT WORKING] Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
-            .option('--resolverListFileSignature [string]', '[NOT WORKING] SHA512 hash of the DNSCrypt resolver list file.', 'a17ff27f1a6e3a0de68a40bac4339ba8ff593b7220ae0f0690e10554465a64dbfdd3a0eaa26fbfcc84dbf87f3bc50cdf11cf8e1cd5898736025eb27dbc0a2aba')
+            .option('--binaryFile [string]', 'Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
+            .option('--binaryFileSignature [string]', 'SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
+            .option('--resolverListFile [string]', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
+            .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', 'a17ff27f1a6e3a0de68a40bac4339ba8ff593b7220ae0f0690e10554465a64dbfdd3a0eaa26fbfcc84dbf87f3bc50cdf11cf8e1cd5898736025eb27dbc0a2aba')
             .parse(process.argv);
         
         // Hashes of external files
         this.hashTable = {
-            'dnscrypt-resolvers.csv': 'a17ff27f1a6e3a0de68a40bac4339ba8ff593b7220ae0f0690e10554465a64dbfdd3a0eaa26fbfcc84dbf87f3bc50cdf11cf8e1cd5898736025eb27dbc0a2aba',
-            'dnscrypt-proxy': '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582'
+            'dnscrypt-proxy': cli.binaryFileSignature,
+            'dnscrypt-resolvers.csv': cli.resolverListFileSignature
         };
         
         // Options
         this.options = {
-            serverListFile:     fs.readFileSync(serverListFile),
-            dnscryptFile:       fs.readFileSync(dnscryptFile),
+            dnscryptFile:       fs.readFileSync(cli.binaryFile),
+            serverListFile:     fs.readFileSync(cli.resolverListFile),
             dnscryptFileTmp:    '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000),
-            rotateTime:         600 // 10 minutes
+            rotateTime:         cli.rotationTime // 10 minutes
         };
     }
     
@@ -193,7 +193,7 @@ class randomDNS {
                 
                 let process = spawn(options.dnscryptFileTmp, [
                     '--local-address',
-                    '127.0.0.1:53',
+                    cli.listenOn,
                     '-E', // Use ephemeral keys
                     '-r',
                     pickedServer[RANDOMDNS_RESOLVER_ADDRESS],
@@ -238,7 +238,4 @@ class randomDNS {
 };
 
 // Start randomDNS
-(new randomDNS(
-    '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy', // Use brew update && brew upgrade && brew install dnscrypt-proxy
-    path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv')
-)).run();
+(new randomDNS()).run();
