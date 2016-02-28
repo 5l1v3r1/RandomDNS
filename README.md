@@ -27,7 +27,6 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 
 ##### ToDo
 
-- Add option to pass arguments (e.g. --filters, --listenOn, --rotateTime, --dnscryptFile, --dnscryptFileSignature)
 - Add the possibility to filter servers selection (e.g. only IPv6, only Switzerland, only no-log servers...)
 
 ##### Roadmap

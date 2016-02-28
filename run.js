@@ -29,6 +29,7 @@ const assert     = require('assert'),
       crypto     = require('crypto'),
       path       = require('path'),
       fs         = require('fs'),
+      cli        = require('commander'),
       debug      = require('debug'),
       async      = require('async'),
       csv        = require('csv'),
@@ -54,6 +55,26 @@ class randomDNS {
     
     constructor(dnscryptFile, serverListFile) {
         
+        // Splash
+        console.log(new Buffer('DQogICBfX18gICAgICAgICAgICAgICBfXyAgICAgICAgICAgX19fICBfICBfX19fX18NCiAgLyBfIFxfX18gX19fXyAgX19fLyAvX18gIF9fIF8gIC8gXyBcLyB8LyAvIF9fLw0KIC8gLCBfLyBfIGAvIF8gXC8gXyAgLyBfIFwvICAnIFwvIC8vIC8gICAgL1wgXCAgDQovXy98X3xcXyxfL18vL18vXF8sXy9cX19fL18vXy9fL19fX18vXy98Xy9fX18vICANCg==', 'base64').toString('ascii'));
+        
+        cli.version(require('./package.json').version)
+            .usage('[options] [file]')
+            .option('-I, --listenOn [string]', '[NOT WORKING] Listen on a specific interface/port [127.0.0.1:53]', '127.0.0.1:53')
+            .option('-P, --reverseProxy [bool]', '[NOT WORKING] Enable reverse proxy [true]', true)
+            .option('-C, --inMemoryCaching [bool]', '[NOT WORKING] Enable in-memory DNS caching and hashing with Consistent Hashing (only if --reverseProxy is enabled) [true]', true)
+            .option('-B, --loadBalancing [bool]', '[NOT WORKING] Do load balancing (only if --reverseProxy is enabled) [true]', true)
+            .option('-T, --threads [int]', '[NOT WORKING] Number of childs to spawn (only if --loadBalancing is activated) [4]', 4)
+            .option('-R, --rotationTime [int]', '[NOT WORKING] Define the time to wait before rotating the server (in seconds) [600]', 600)
+            .option('-H, --healthCheck [int]', '[NOT WORKING] Set a children timeout if not responding anymore [10 seconds]', 10)
+            .option('-F, --filters [object]', '[NOT WORKING] Use filters [{IPv6: false}]', {IPv6: false})
+            .option('--filters-help', '[NOT WORKING] Get full list of available filters.')
+            .option('--binaryFile [string]', '[NOT WORKING] Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
+            .option('--binaryFileSignature [string]', '[NOT WORKING] SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
+            .option('--resolverListFile [string]', '[NOT WORKING] Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
+            .option('--resolverListFileSignature [string]', '[NOT WORKING] SHA512 hash of the DNSCrypt resolver list file.', 'a17ff27f1a6e3a0de68a40bac4339ba8ff593b7220ae0f0690e10554465a64dbfdd3a0eaa26fbfcc84dbf87f3bc50cdf11cf8e1cd5898736025eb27dbc0a2aba')
+            .parse(process.argv);
+        
         // Hashes of external files
         this.hashTable = {
             'dnscrypt-resolvers.csv': 'a17ff27f1a6e3a0de68a40bac4339ba8ff593b7220ae0f0690e10554465a64dbfdd3a0eaa26fbfcc84dbf87f3bc50cdf11cf8e1cd5898736025eb27dbc0a2aba',
@@ -69,7 +90,7 @@ class randomDNS {
         };
     }
     
-    // Function that check if the current user is root
+    // Check if the current user is root
     isRoot() {
         return (process.getuid && process.getuid() === 0);
     }
@@ -94,10 +115,7 @@ class randomDNS {
         const coreDebug = debug('core');
         let options = this.options,
             getRandomNumber = this.getRandomNumber;
-        
-        // Splash
-        console.log(new Buffer('DQogICBfX18gICAgICAgICAgICAgICBfXyAgICAgICAgICAgX19fICBfICBfX19fX18NCiAgLyBfIFxfX18gX19fXyAgX19fLyAvX18gIF9fIF8gIC8gXyBcLyB8LyAvIF9fLw0KIC8gLCBfLyBfIGAvIF8gXC8gXyAgLyBfIFwvICAnIFwvIC8vIC8gICAgL1wgXCAgDQovXy98X3xcXyxfL18vL18vXF8sXy9cX19fL18vXy9fL19fX18vXy98Xy9fX18vICANCg==', 'base64').toString('ascii'));
-        
+                
         // Runtime checks
         try {
         
@@ -129,7 +147,7 @@ class randomDNS {
             console.error(e);
             return false;
         }
-
+        
         async.series([
             
             // Write binary in /tmp as root with restricted permissions
