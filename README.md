@@ -39,4 +39,4 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 	- Do Consistent Hashing while the program is running (hash DNS requests, save it in memory and when there is a match send it to the same upstream provider) \*\*
 - Add support for DNSSEC (?) \*\*
 
-(\*\*) *Thanks [@jedisct1](https://github/jedisct1) for the ideas.*
+(\*\*) *Thanks [@jedisct1](https://github.com/jedisct1) for the ideas.*
