@@ -7,8 +7,9 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 #### Features
 
 - Randomize the provider at runtime
+- Use (-E)phemeral keys option
 - Securely run DNSCrypt proxy by verifying its hash and by copying it in /tmp dir with restricted permissions
-- Watch DNSCrypt process and relaunch it if it dies
+- Watch the proxy process and relaunch it if it dies
 
 #### How to use it
 
