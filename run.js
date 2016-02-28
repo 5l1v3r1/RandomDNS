@@ -41,12 +41,12 @@
 
 const assert     = require('assert'),
       crypto     = require('crypto'),
-      path         = require('path'),
+      path       = require('path'),
       fs         = require('fs'),
-      debug        = require('debug'),
-      async        = require('async'),
+      debug      = require('debug'),
+      async      = require('async'),
       csv        = require('csv'),
-      Random    = require('random-js');
+      Random     = require('random-js');
 
 // Define CSV rows
 const RANDOMDNS_NAME = 0,
@@ -77,8 +77,8 @@ class randomDNS {
         // Options
         this.options = {
             serverListFile:     fs.readFileSync(serverListFile),
-            dnscryptFile:         fs.readFileSync(dnscryptFile),
-            dnscryptFileTmp:     '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000)
+            dnscryptFile:       fs.readFileSync(dnscryptFile),
+            dnscryptFileTmp:    '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000)
         };
     }
     
