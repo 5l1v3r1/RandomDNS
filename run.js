@@ -130,7 +130,7 @@ class randomDNS {
         }
 
         const coreDebug = debug('core');
-        let    options = this.options,
+        let options = this.options,
             getRandomNumber = this.getRandomNumber;
             
         async.series([
