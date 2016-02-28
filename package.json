@@ -1,0 +1,16 @@
+{
+  "name": "randomdns",
+  "version": "1.0.0",
+  "description": "RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server at runtime.",
+  "main": "run.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.5.2",
+    "debug": "^2.2.0",
+    "random-js": "^1.0.8"
+  }
+}
