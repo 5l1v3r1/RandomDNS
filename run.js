@@ -5,7 +5,6 @@
  * /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
  *
  * Version: 1.0 (Alpha)
- * Description: RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server at runtime.
  * Author: Sabri Haddouche <sabri@riseup.net>
  *
  * This project is my first project who use ES6 so please be kind with critics!
@@ -210,5 +209,5 @@ class randomDNS {
 // Start randomDNS
 (new randomDNS(
     '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy', // Use brew update && brew upgrade && brew install dnscrypt-proxy
-    path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv') // Clone or download the dnscrypt-resolvers.csv available here: https://raw.githubusercontent.com/jedisct1/dnscrypt-proxy/master/dnscrypt-resolvers.csv
+    path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv')
 )).run();
