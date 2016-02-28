@@ -8,6 +8,7 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 - Use (-E)phemeral keys option
 - Securely run DNSCrypt proxy by verifying its hash and by copying it in /tmp dir with restricted permissions
 - Watch the proxy process and relaunch it if it dies
+- Rotate the server with a defined time (default: 10 minutes)
 
 #### How to use it
 
@@ -31,4 +32,3 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 
 - Add health checks (if the server does not answer anymore, pick another one)
 - Spawn multiples DNSCrypt processes and do DNS requests load balancing
-- Rotate the server with a defined time

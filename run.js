@@ -64,7 +64,8 @@ class randomDNS {
         this.options = {
             serverListFile:     fs.readFileSync(serverListFile),
             dnscryptFile:       fs.readFileSync(dnscryptFile),
-            dnscryptFileTmp:    '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000)
+            dnscryptFileTmp:    '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000),
+            rotateTime:         600 // 10 minutes
         };
     }
     
@@ -89,6 +90,11 @@ class randomDNS {
     
     run() {
         
+        // Load dependencies
+        const coreDebug = debug('core');
+        let options = this.options,
+            getRandomNumber = this.getRandomNumber;
+        
         // Splash
         console.log(new Buffer('DQogICBfX18gICAgICAgICAgICAgICBfXyAgICAgICAgICAgX19fICBfICBfX19fX18NCiAgLyBfIFxfX18gX19fXyAgX19fLyAvX18gIF9fIF8gIC8gXyBcLyB8LyAvIF9fLw0KIC8gLCBfLyBfIGAvIF8gXC8gXyAgLyBfIFwvICAnIFwvIC8vIC8gICAgL1wgXCAgDQovXy98X3xcXyxfL18vL18vXF8sXy9cX19fL18vXy9fL19fX18vXy98Xy9fX18vICANCg==', 'base64').toString('ascii'));
         
@@ -107,11 +113,16 @@ class randomDNS {
             assert((
                 this.createSignature(this.options.serverListFile) == this.hashTable['dnscrypt-resolvers.csv']
             ), 'Failed to check integrity of dnscrypt-resolvers.csv, aborting');
+            
+            // Show the server rotation setting if set
+            if(options.rotateTime != 0) {
+                coreDebug(`Server rotation set to ${options.rotateTime} seconds`);
+            }
 
         } catch(e) {
             
             if(e.name == 'AssertionError') {
-                console.error('[ERROR] ' + e.message);
+                console.error(`[ERROR] ${e.message}`);
                 return false;
             }
             
@@ -119,10 +130,6 @@ class randomDNS {
             return false;
         }
 
-        const coreDebug = debug('core');
-        let options = this.options,
-            getRandomNumber = this.getRandomNumber;
-            
         async.series([
             
             // Write binary in /tmp as root with restricted permissions
@@ -149,22 +156,23 @@ class randomDNS {
             // List number of available servers
             coreDebug(`${result.length} servers are available. Picking one...`);
             
-            // Get a random server in the list
-            let randomChoosenInt = getRandomNumber(result.length - 1);
-            let pickedServer = result[randomChoosenInt];
-
-            // Show informations about the resolver
-            coreDebug(`OK. Taking ${pickedServer[RANDOMDNS_NAME]} based in ${pickedServer[RANDOMDNS_LOCATION]}`);
-            coreDebug(`Full name: ${pickedServer[RANDOMDNS_FULLNAME]}`);
-            coreDebug('Do they log? ' + (pickedServer[RANDOMDNS_NO_LOG] == 'yes' ? 'No' : 'Yes'));
-            coreDebug(`Resolver Address: ${pickedServer[RANDOMDNS_RESOLVER_ADDRESS]}`);
-            coreDebug(`Public Key: ${pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]}`);
-            
             // Require some dependencies
             const spawn = require('child_process').spawn,
                   childDebug = debug('proxy');
-            
+
             let runDNSCrypt = () => {
+                
+                // Get a random server in the list
+                let randomChoosenInt = getRandomNumber(result.length - 1);
+                let pickedServer = result[randomChoosenInt];
+                
+                // Show informations about the resolver
+                coreDebug(`OK. Taking ${pickedServer[RANDOMDNS_NAME]} based in ${pickedServer[RANDOMDNS_LOCATION]}`);
+                coreDebug(`Full name: ${pickedServer[RANDOMDNS_FULLNAME]}`);
+                coreDebug('Do they log? ' + (pickedServer[RANDOMDNS_NO_LOG] == 'yes' ? 'No' : 'Yes'));
+                coreDebug(`Resolver Address: ${pickedServer[RANDOMDNS_RESOLVER_ADDRESS]}`);
+                coreDebug(`Public Key: ${pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]}`);
+                
                 let process = spawn(options.dnscryptFileTmp, [
                     '--local-address',
                     '127.0.0.1:53',
@@ -176,17 +184,32 @@ class randomDNS {
                     '--provider-key',
                     pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]
                 ]);
+                
+                // Rotate the provider in a predefined time
+                if(options.rotateTime != 0) {
+                    setTimeout(() => {
+                        process.kill('SIGINT');
+                    }, options.rotateTime * 1000);
+                }
+                
                 process.stdout.on('data', (data) => {
-                  childDebug(`stdout: ${data}`);
+                    childDebug(`stdout: ${data}`);
                 });
+                
                 process.stderr.on('data', (data) => {
-                  childDebug(`stderr: ${data}`);
+                    childDebug(`stderr: ${data}`);
                 });
+                
                 process.on('close', (code) => {
-                  childDebug(`DNSCrypt proxy exited with code ${code}! Running again...`);
+                    
+                    if(code == null) {
+                        coreDebug(`Rotating the server...`);
+                    } else {
+                        coreDebug(`DNSCrypt proxy exited with code ${code}! Running again...`);
+                    }
                   
-                  // Looks like the process exited so run it again
-                  setTimeout(runDNSCrypt, 2500);
+                    // Looks like the process exited so run it again
+                    setTimeout(runDNSCrypt, 2500);
                 });
             };
             
