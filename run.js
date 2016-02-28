@@ -9,19 +9,6 @@
  *
  * This project is my first project who use ES6 so please be kind with critics!
  *
- * ToDo:
- * - Check hash of files -> Done
- * - Run DNSCrypt proxy in /tmp directory with restricted permissions -> Done
- * - Pick a random entry in the csv -> Done
- * - Run DNSCrypt proxy process -> Done
- * - Watch it and relaunch it when the process die -> Done
- * - Add the possibility to filter servers selection (e.g. only IPv6, only Switzerland, only no-log servers...) -> Doing
- *
- * Roadmap:
- * - Add health checks (if the server does not answer anymore, pick another one)
- * - Spawn multiples DNSCrypt processes and do DNS requests load balancing
- * - Rotate the server with a defined time
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or

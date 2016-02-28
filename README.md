@@ -4,6 +4,14 @@
 
 RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server at runtime.
 
+#### Features
+
+- Randomize the provider at runtime
+- Securely run DNSCrypt proxy by verifying its hash and by copying it in /tmp dir with restricted permissions
+- Watch DNSCrypt process and relaunch it if it dies
+
+#### How to use it
+
 0) Update Brew
 ```brew update && brew upgrade```
 
@@ -15,3 +23,13 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 ```sudo DEBUG=* node ./run.js```
 
 3) Set your DNS settings to 127.0.0.1
+
+##### ToDo
+
+- Add the possibility to filter servers selection (e.g. only IPv6, only Switzerland, only no-log servers...)
+
+##### Roadmap
+
+- Add health checks (if the server does not answer anymore, pick another one)
+- Spawn multiples DNSCrypt processes and do DNS requests load balancing
+- Rotate the server with a defined time
