@@ -12,4 +12,6 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 ```git clone https://github.com/pwnsdx/RandomDNS.git && cd RandomDNS && npm update```
 ```sudo DEBUG=* node ./run.js```
 
+3) Set your DNS settings to 127.0.0.1
+
 *Note: This readme will look better later.*
