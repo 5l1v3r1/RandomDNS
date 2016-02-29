@@ -112,9 +112,9 @@ class randomDNS {
     run() {
         
         // Load dependencies
-        const coreDebug = debug('core');
-        let options = this.options,
-            getRandomNumber = this.getRandomNumber;
+        const coreDebug = debug('core'),
+              options = this.options,
+              getRandomNumber = this.getRandomNumber;
                 
         // Runtime checks
         try {
@@ -191,7 +191,7 @@ class randomDNS {
                 coreDebug(`Resolver Address: ${pickedServer[RANDOMDNS_RESOLVER_ADDRESS]}`);
                 coreDebug(`Public Key: ${pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]}`);
                 
-                let process = spawn(options.dnscryptFileTmp, [
+                let childArgs = [
                     '--local-address',
                     cli.listenOn,
                     '-E', // Use ephemeral keys
@@ -201,8 +201,12 @@ class randomDNS {
                     pickedServer[RANDOMDNS_PROVIDER_NAME],
                     '--provider-key',
                     pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]
-                ]);
+                ],
+                process = spawn(options.dnscryptFileTmp, childArgs);
                 
+                coreDebug(`Running ${options.dnscryptFileTmp} ${childArgs.join(' ')}...`);
+                console.log(`${options.dnscryptFileTmp} ${childArgs.join(' ')}`);
+
                 // Rotate the provider in a predefined time
                 if(options.rotateTime != 0) {
                     setTimeout(() => {
