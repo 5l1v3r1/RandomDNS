@@ -51,7 +51,7 @@ const RANDOMDNS_NAME = 0,
       RANDOMDNS_PROVIDER_PUBLICKEY = 12,
       RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD = 13;
 
-class randomDNS {
+class RandomDNS {
     
     constructor() {
         
@@ -80,7 +80,7 @@ class randomDNS {
             'dnscrypt-proxy': cli.binaryFileSignature,
             'dnscrypt-resolvers.csv': cli.resolverListFileSignature
         };
-        
+                
         // Options
         this.options = {
             dnscryptFile:       fs.readFileSync(cli.binaryFile),
@@ -168,7 +168,7 @@ class randomDNS {
             // Get server list content
             let result = serverListParsed[1];
 
-            // Remove names entry
+            // Remove descriptions rows
             delete result[0];
             
             // List number of available servers
@@ -242,4 +242,4 @@ class randomDNS {
 };
 
 // Start randomDNS
-(new randomDNS()).run();
+(new RandomDNS()).run();
