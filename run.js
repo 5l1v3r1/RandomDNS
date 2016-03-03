@@ -92,7 +92,7 @@ class RandomDNS {
             dnscryptFile:       fs.readFileSync(cli.binaryFile),
             serverListFile:     fs.readFileSync(cli.resolverListFile),
             dnscryptFileTmp:    '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000),
-            rotateTime:         cli.rotationTime,
+            rotateTime:         cli.rotationTime
         };
     }
     
@@ -115,9 +115,9 @@ class RandomDNS {
             .digest(encoding || 'hex')
     }
 
-    // Filters part
+    // Filters part (may be soon moved in a plugins system)
     filters() {
-        return require('./filters');
+        return require('./filters')(RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RANDOMDNS_LOCATION, RANDOMDNS_COORDINATES, RANDOMDNS_URL, RANDOMDNS_VERSION, RANDOMDNS_DNSSEC_VALIDATION, RANDOMDNS_NO_LOG, RANDOMDNS_NAMECOIN, RANDOMDNS_RESOLVER_ADDRESS, RANDOMDNS_PROVIDER_NAME, RANDOMDNS_PROVIDER_PUBLICKEY, RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD);
     }
     applyFilters(serverList) {
                 
