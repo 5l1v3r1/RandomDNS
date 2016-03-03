@@ -128,12 +128,19 @@ class RandomDNS {
         for(filter in userFilters) {
             
             // Lowercase the filter name
-            let filterNameNormalized = filter.toLowerCase();
+            let filterNameNormalized = filter.toLowerCase(),
+                filterObject = availableFilters[filterNameNormalized];
             
-            if(typeof availableFilters[filterNameNormalized] == 'object') {
+            if(typeof filterObject == 'object') {
+                
+                // Skip if the filter is flagged as not working
+                if(!filterObject[0].working) {
+                    continue;
+                }
+                
                 // Pattern found, send server list to the function
                 coreDebug('Sending datas to ' + filter + '...');
-                serverList = availableFilters[filterNameNormalized][1](serverList, userFilters[filter]);
+                serverList = filterObject[1](serverList, userFilters[filter]);
                 continue;
             }
             
@@ -155,6 +162,12 @@ class RandomDNS {
         // Print them
         let filter, example;
         for(filter in filtersToShow) {
+            
+            // Skip if the filter is flagged as not working
+            if(!filtersToShow[filter][0].working) {
+                continue;
+            }
+            
             prtConsole(filter + ':', 2);
             
             let filterDescription = filtersToShow[filter][0].description,

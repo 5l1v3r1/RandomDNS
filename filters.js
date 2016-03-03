@@ -54,7 +54,6 @@ module.exports = {
             ]
         },
         (values, want) => {
-            return values; // NOT WORKING YET
             
             // Get the country to 2-letter code
             let countryToTwoLetterCode = require('./ISO-3166-Countries-with-Regional-Codes/slim-2.json');
