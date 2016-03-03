@@ -3,4 +3,4 @@
 	url = https://github.com/jedisct1/dnscrypt-proxy.git
 [submodule "ISO-3166-Countries-with-Regional-Codes"]
 	path = ISO-3166-Countries-with-Regional-Codes
-	url = https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes
+	url = https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes.git
