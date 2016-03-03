@@ -27,14 +27,14 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 
 ##### ToDo
 
-- Add the possibility to filter servers selection (e.g. only IPv6, only Switzerland, only no-log servers...)
+- Add health checks support (if the server does not answer anymore, pick another one)
 
 ##### Roadmap
 
-- Add health checks (if the server does not answer anymore, pick another one)
 - Have in-memory cache support
 - Do a reverse proxy so it can:
 	- Spawn multiples DNSCrypt processes and do DNS requests load balancing
+	- Scramble monitoring of DNS traffic by sending fake DNS requests randomly
 	- Do Consistent Hashing while the program is running (hash DNS requests, save it in memory and when there is a match send it to the same upstream provider) \*\*
 - Add support for DNSSEC (?) \*\*
 

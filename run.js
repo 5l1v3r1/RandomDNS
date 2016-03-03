@@ -4,7 +4,7 @@
  *  / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \  
  * /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
  *
- * Version: 1.1 (Alpha)
+ * Version: 1.2 (Alpha)
  * Author: Sabri Haddouche <sabri@riseup.net>
  *
  * This project is my first project who use ES6 so please be kind with critics!
@@ -25,17 +25,7 @@
 
 "use strict";
 
-const assert     = require('assert'),
-      crypto     = require('crypto'),
-      path       = require('path'),
-      fs         = require('fs'),
-      cli        = require('commander'),
-      debug      = require('debug'),
-      async      = require('async'),
-      csv        = require('csv'),
-      Random     = require('random-js');
-
-// Define CSV rows
+// Define server list rows
 const RANDOMDNS_NAME = 0,
       RANDOMDNS_FULLNAME = 1,
       RANDOMDNS_DESCRIPTION = 2,
@@ -51,6 +41,21 @@ const RANDOMDNS_NAME = 0,
       RANDOMDNS_PROVIDER_PUBLICKEY = 12,
       RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD = 13;
 
+// Import dependencies
+const assert    = require('assert'),
+      crypto    = require('crypto'),
+      path      = require('path'),
+      fs        = require('fs'),
+      cli       = require('commander'),
+      debug     = require('debug'),
+      async     = require('async'),
+      csv       = require('csv'),
+      filters   = require('cookie'),
+      random    = require('random-js');
+
+// Core debug
+const coreDebug = debug('core');
+
 class RandomDNS {
     
     constructor() {
@@ -63,12 +68,13 @@ class RandomDNS {
             .option('-L, --listenOn [string]', 'Listen on a specific interface/port [default: 127.0.0.1:53]', '127.0.0.1:53')
             .option('-R, --rotationTime [int]', 'Define the time to wait before rotating the server (in seconds) [default: 600 seconds]', 600)
             //.option('-P, --reverseProxy [bool]', 'Enable reverse proxy [default: true]', true)
+            //.option('-S, --scramble [bool]', 'Scramble your DNS traffic by resolving fake queries [default: true]', true)
             //.option('-C, --inMemoryCaching [bool]', 'Enable in-memory DNS caching and hashing with Consistent Hashing (only if --reverseProxy is enabled) [default: true]', true)
             //.option('-B, --loadBalancing [bool]', 'Do load balancing (only if --reverseProxy is enabled) [default: true]', true)
             //.option('-T, --threads [int]', 'Number of childs to spawn (only if --loadBalancing is activated) [default: 4]', 4)
             //.option('-H, --healthCheck [int]', 'Set a children timeout if not responding anymore [default: 10 seconds]', 10)
-            //.option('-F, --filters [object]', 'Use filters [default: {IPv6: false}]', {IPv6: false})
-            //.option('--filters-help', 'Get full list of available filters.')
+            .option('-F, --filters [object]', 'Use filters [default: IPv6=false;]', 'IPv6=false;')
+            .option('--filters-help', 'Get full list of available filters.')
             .option('-b, --binaryFile [string]', 'Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
             .option('--binaryFileSignature [string]', 'SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
             .option('-r, --resolverListFile [string]', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
@@ -80,13 +86,13 @@ class RandomDNS {
             'dnscrypt-proxy': cli.binaryFileSignature,
             'dnscrypt-resolvers.csv': cli.resolverListFileSignature
         };
-                
+
         // Options
         this.options = {
             dnscryptFile:       fs.readFileSync(cli.binaryFile),
             serverListFile:     fs.readFileSync(cli.resolverListFile),
             dnscryptFileTmp:    '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000),
-            rotateTime:         cli.rotationTime // 10 minutes
+            rotateTime:         cli.rotationTime,
         };
     }
     
@@ -97,8 +103,8 @@ class RandomDNS {
     
     // Generate non cryptographically secure random number by using Mersenne Twister
     getRandomNumber(maxInt) {
-        return Random
-            .integer(0, maxInt)(Random.engines.mt19937().autoSeed());
+        return random
+            .integer(0, maxInt)(random.engines.mt19937().autoSeed());
     }
     
     // Check hash of a file
@@ -108,14 +114,77 @@ class RandomDNS {
             .update(datas, 'utf8')
             .digest(encoding || 'hex')
     }
+
+    // Filters part
+    filters() {
+        return require('./filters');
+    }
+    applyFilters(serverList) {
+                
+        let filter,
+            userFilters         = filters.parse(cli.filters),
+            availableFilters    = this.filters();
+        
+        for(filter in userFilters) {
+            
+            // Lowercase the filter name
+            let filterNameNormalized = filter.toLowerCase();
+            
+            if(typeof availableFilters[filterNameNormalized] == 'object') {
+                // Pattern found, send server list to the function
+                coreDebug('Sending datas to ' + filter + '...');
+                serverList = availableFilters[filterNameNormalized][1](serverList, userFilters[filter]);
+                continue;
+            }
+            
+            coreDebug('Skipping unknown "' + filter + '" filter.');
+        }
+        
+        return serverList;
+    }
+    showFilters() {
+        
+        let filtersToShow = this.filters(),
+            prtConsole = ((string, tabulationCount) => {
+                console.log(('  '.repeat(tabulationCount || 0)) + string);
+            });
+        
+        prtConsole('Available filters:');
+        prtConsole('');
+        
+        // Print them
+        let filter, example;
+        for(filter in filtersToShow) {
+            prtConsole(filter + ':', 2);
+            
+            let filterDescription = filtersToShow[filter][0].description,
+                filterExamples = filtersToShow[filter][0].examples;
+            
+            prtConsole('Description: ' + filterDescription, 3);
+            prtConsole('');
+            prtConsole('Examples:', 3);
+            
+            for(example in filterExamples) {
+                prtConsole('--filters="'+ filter + '=' + filterExamples[example] + ';"', 4);
+            }
+            
+            prtConsole('');
+        }
+    }
     
     run() {
         
         // Load dependencies
-        const coreDebug = debug('core'),
-              options = this.options,
-              getRandomNumber = this.getRandomNumber;
-                
+        const options           = this.options,
+              getRandomNumber   = this.getRandomNumber,
+              applyFilters      = this.applyFilters;
+              
+        // Show available filters?
+        if((typeof cli.filtersHelp != 'undefined') && cli.filtersHelp) {
+            this.showFilters();
+            return false;
+        }
+
         // Runtime checks
         try {
         
@@ -171,6 +240,11 @@ class RandomDNS {
             // Remove descriptions rows
             delete result[0];
             
+            // Apply filters (if any)
+            if((typeof cli.filters == 'string') && (cli.filters != '')) {
+                result = this.applyFilters(result);
+            }
+            
             // List number of available servers
             coreDebug(`${result.length} servers are available. Picking one...`);
             
@@ -211,7 +285,7 @@ class RandomDNS {
                 if(options.rotateTime != 0) {
                     setTimeout(() => {
                         process.kill('SIGINT');
-                    }, options.rotateTime * 1000);
+                    }, (options.rotateTime * 1000));
                 }
                 
                 process.stdout.on('data', (data) => {
