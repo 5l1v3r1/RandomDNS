@@ -26,6 +26,31 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 
 3) Set your DNS settings to 127.0.0.1
 
+#### Help
+
+```
+      ___               __           ___  _  ______
+     / _ \___ ____  ___/ /__  __ _  / _ \/ |/ / __/
+    / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \  
+   /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
+   
+   
+     Usage: run [options] [file]
+   
+     Options:
+   
+   	-h, --help                            output usage information
+   	-V, --version                         output the version number
+   	-L, --listenOn [string]               Listen on a specific interface/port [default: 127.0.0.1:53]
+   	-R, --rotationTime [int]              Define the time to wait before rotating the server (in seconds) [default: 600 seconds]
+   	-F, --filters [object]                Use filters [default: IPv6=false;]
+   	--filters-help                        Get full list of available filters.
+   	-b, --binaryFile [string]             Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.
+   	--binaryFileSignature [string]        SHA512 hash of the DNSCrypt binary.
+   	-r, --resolverListFile [string]       Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
+   	--resolverListFileSignature [string]  SHA512 hash of the DNSCrypt resolver list file.
+```
+
 ##### ToDo
 
 - Add health checks support (if the server does not answer anymore, pick another one)
