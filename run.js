@@ -291,8 +291,8 @@ class RandomDNS {
                 ],
                 process = spawn(options.dnscryptFileTmp, childArgs);
                 
+                // Print the command that has been executed
                 coreDebug(`Running ${options.dnscryptFileTmp} ${childArgs.join(' ')}...`);
-                console.log(`${options.dnscryptFileTmp} ${childArgs.join(' ')}`);
 
                 // Rotate the provider in a predefined time
                 if(options.rotateTime != 0) {
