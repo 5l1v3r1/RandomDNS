@@ -140,7 +140,8 @@ class RandomDNS {
                 
                 // Pattern found, send server list to the function
                 coreDebug('Sending datas to ' + filter + '...');
-                serverList = filterObject[1](serverList, userFilters[filter]);
+                serverList = filterObject[1](serverList, userFilters[filter])
+                    .filter(function(a){return typeof a !== 'undefined';}); // Remove deleted values with JS filter function
                 continue;
             }
             

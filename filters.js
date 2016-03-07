@@ -30,7 +30,7 @@ const debug         = require('debug'),
 module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RANDOMDNS_LOCATION, RANDOMDNS_COORDINATES, RANDOMDNS_URL, RANDOMDNS_VERSION, RANDOMDNS_DNSSEC_VALIDATION, RANDOMDNS_NO_LOG, RANDOMDNS_NAMECOIN, RANDOMDNS_RESOLVER_ADDRESS, RANDOMDNS_PROVIDER_NAME, RANDOMDNS_PROVIDER_PUBLICKEY, RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD) => {
     
     return {
-        
+                
         country: [
             {
                 working: false,
@@ -62,7 +62,7 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
             }, (valuesOriginal, want) => {
                 if(want !== 'false') return valuesOriginal;
                             
-                // Delete IPv6 addresses
+                // Init
                 let value,
                     ipRegex = require('ip-regex'),
                     values = valuesOriginal;
@@ -79,8 +79,7 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
                     }
                 }
                 
-                // Remove deleted values with JS filter function then return it
-                return values.filter(function(a){return typeof a !== 'undefined';});
+                return values;
             }
         ],
         
@@ -92,7 +91,7 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
             }, (valuesOriginal, want) => {
                 if(want !== 'true') return valuesOriginal;
                 
-                // Delete IPv6 addresses
+                // Init
                 let value,
                     values = valuesOriginal;
                 
@@ -111,8 +110,7 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
                     }
                 }
                 
-                // Remove deleted values with JS filter function then return it
-                return values.filter(function(a){return typeof a !== 'undefined';});
+                return values;
             }
         ]
     };
