@@ -58,14 +58,9 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
             {
                 working: true,
                 description: 'IPv6 filter enable/disable the usage of IPv6 servers.',
-                examples: [
-                    "true", "false"
-                ]
+                examples: [ "true", "false" ]
             }, (valuesOriginal, want) => {
-                            
-                if(want !== 'false') {
-                    return values;
-                }
+                if(want !== 'false') return valuesOriginal;
                             
                 // Delete IPv6 addresses
                 let value,
@@ -84,15 +79,40 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
                     }
                 }
                 
-                // Remove deleted values with JS filter function
-                values = values.filter(function(a){return typeof a !== 'undefined';});
+                // Remove deleted values with JS filter function then return it
+                return values.filter(function(a){return typeof a !== 'undefined';});
+            }
+        ],
+        
+        nolog: [
+            {
+                working: true,
+                description: 'Get only servers with no-logging policy.',
+                examples: [ "true", "false" ]
+            }, (valuesOriginal, want) => {
+                if(want !== 'true') return valuesOriginal;
                 
-                // If nothing has been deleted, say it
-                if(valuesOriginal.length == values.length) {
-                    filtersDebug('Nothing has been deleted.');
+                // Delete IPv6 addresses
+                let value,
+                    values = valuesOriginal;
+                
+                for(value in values) {
+                    
+                    // Get server infos
+                    let serverInfo = values[value];
+                    
+                    // If no informations are given about the logging policy, continue
+                    if(typeof serverInfo[RANDOMDNS_NO_LOG] == 'undefined') continue;
+                    
+                    // Delete the entry if the server is logging DNS queries according to DNSCrypt-Proxy
+                    if(serverInfo[RANDOMDNS_NO_LOG].toLowerCase() == 'no') {
+                        filtersDebug('Deleted ' + serverInfo[RANDOMDNS_FULLNAME]);
+                        delete values[ value ];
+                    }
                 }
                 
-                return values;
+                // Remove deleted values with JS filter function then return it
+                return values.filter(function(a){return typeof a !== 'undefined';});
             }
         ]
     };
