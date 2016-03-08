@@ -290,7 +290,7 @@ class RandomDNS {
                     '--provider-key',
                     pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]
                 ],
-                process = spawn(options.dnscryptFileTmp, childArgs);
+                childProcess = spawn(options.dnscryptFileTmp, childArgs);
                 
                 // Print the command that has been executed
                 coreDebug(`Running ${options.dnscryptFileTmp} ${childArgs.join(' ')}...`);
@@ -298,28 +298,37 @@ class RandomDNS {
                 // Rotate the provider in a predefined time
                 if(options.rotateTime != 0) {
                     setTimeout(() => {
-                        process.kill('SIGINT');
+                        childProcess.kill('SIGINT');
                     }, (options.rotateTime * 1000));
                 }
                 
-                process.stdout.on('data', (data) => {
+                childProcess.stdout.on('data', (data) => {
+                    
+                    // Ensure the proxy works
+                    if(data.toString('utf8').trim() == '[ERROR] Unable to retrieve server certificates') {
+                        coreDebug('Error while connecting to this server.');
+                        childProcess.kill('SIGINT');
+                        return false;
+                    }
+                    
                     childDebug(`stdout: ${data}`);
                 });
                 
-                process.stderr.on('data', (data) => {
+                childProcess.stderr.on('data', (data) => {
                     childDebug(`stderr: ${data}`);
                 });
                 
-                process.on('close', (code) => {
+                childProcess.on('close', (code) => {
                     
                     if(code == null) {
                         coreDebug(`Rotating the server...`);
-                    } else {
-                        coreDebug(`DNSCrypt proxy exited with code ${code}! Running again...`);
+                        setTimeout(runDNSCrypt, 2500);
+                        return true;
                     }
-                  
-                    // Looks like the process exited so run it again
-                    setTimeout(runDNSCrypt, 2500);
+                    
+                    // DNSCrypt proxy exited with a reason, exit RandomDNS too
+                    coreDebug(`DNSCrypt proxy exited with code ${code}!`);
+                    process.exit(1);
                 });
             };
             
