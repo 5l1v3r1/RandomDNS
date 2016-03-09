@@ -78,7 +78,7 @@ class RandomDNS {
             .option('-b, --binaryFile [string]', 'Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
             .option('--binaryFileSignature [string]', 'SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
             .option('-r, --resolverListFile [string]', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
-            .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', 'a17ff27f1a6e3a0de68a40bac4339ba8ff593b7220ae0f0690e10554465a64dbfdd3a0eaa26fbfcc84dbf87f3bc50cdf11cf8e1cd5898736025eb27dbc0a2aba')
+            .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', '43b3000ce24390314b137109c85c4cf72b6d26e3269029e28d2beb0e1cb6c2b06725fff3858e86e7726a0cc6ed4152fb670d62cc3fa8610b609c22b9b68af273')
             .parse(process.argv);
         
         // Hashes of external files
