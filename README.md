@@ -53,7 +53,7 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 
 ##### ToDo
 
-- Add health checks support (if the server does not answer anymore, pick another one)
+- Add health checks support (if the server does not answer anymore, pick another one) (now detecting dead servers)
 - Add filters: by country, by port
 
 ##### Roadmap

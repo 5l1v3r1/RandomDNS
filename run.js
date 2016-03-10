@@ -304,9 +304,13 @@ class RandomDNS {
                 
                 childProcess.stdout.on('data', (data) => {
                     
-                    // Ensure the proxy works
-                    if(data.toString('utf8').trim() == '[ERROR] Unable to retrieve server certificates') {
-                        coreDebug('Error while connecting to this server.');
+                    // Stringify datas
+                    data = data.toString('utf8').trim();
+                    
+                    // Health check: Detect dead/unreachable server
+                    let healthCheckOnConnectionError = /Unable to retrieve server certificates/g;
+                    if(healthCheckOnConnectionError.test(data)) {
+                        coreDebug('Server is unreachable!');
                         childProcess.kill('SIGINT');
                         return false;
                     }
