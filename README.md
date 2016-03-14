@@ -1,6 +1,6 @@
 ![RandomDNS](https://raw.githubusercontent.com/pwnsdx/RandomDNS/master/screenshot.jpg)
 
-RandomDNS aims to improve the security, privacy and anonymity of DNSCrypt. It can randomize the server choice at runtime and rotate it frequently.
+RandomDNS aims to improve the security, privacy and anonymity of DNSCrypt. It can randomize the server choice at runtime and can rotate it frequently.
 
 ##### What is DNSCrypt?
 
