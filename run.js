@@ -72,7 +72,7 @@ class RandomDNS {
             //.option('-P, --reverseProxy [bool]', 'Enable reverse proxy [default: true]', true)
             //.option('-S, --scramble [bool]', 'Scramble your DNS traffic by resolving fake queries [default: true]', true)
             //.option('-C, --inMemoryCaching [bool]', 'Enable in-memory DNS caching and hashing with Consistent Hashing (only if --reverseProxy is enabled) [default: true]', true)
-            //.option('-B, --loadBalancing [bool]', 'Do load balancing (only if --reverseProxy is enabled) [default: true]', true)
+            //.option('-B, --loadBalancing [bool]', 'Do load balancing using EdgeDNS (only if --reverseProxy is enabled) [default: true]', true)
             //.option('-T, --threads [int]', 'Number of childs to spawn (only if --loadBalancing is activated) [default: 4]', 4)
             //.option('-H, --healthCheck [int]', 'Set a children timeout if not responding anymore [default: 10 seconds]', 10)
             .option('-F, --filters [object]', 'Use filters [default: IPv6=false;]', 'IPv6=false;')

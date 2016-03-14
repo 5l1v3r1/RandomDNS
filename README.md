@@ -1,12 +1,12 @@
 ![RandomDNS](https://raw.githubusercontent.com/pwnsdx/RandomDNS/master/screenshot.jpg)
 
-RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server.
+RandomDNS aims to improve the security, privacy and anonymity of DNSCrypt. It can randomize the server choice at runtime and rotate it frequently.
 
 ##### What is DNSCrypt?
 
 DNSCrypt is a protocol that authenticates communications between a DNS client and a DNS resolver. It prevents DNS spoofing. It uses cryptographic signatures to verify that responses originate from the chosen DNS resolver and haven't been tampered with.
 
-More information at [https://dnscrypt.org/](https://dnscrypt.org/)
+More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
 #### Features
 
