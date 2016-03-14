@@ -2,6 +2,12 @@
 
 RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the choice of the server.
 
+##### What is DNSCrypt?
+
+DNSCrypt is a protocol that authenticates communications between a DNS client and a DNS resolver. It prevents DNS spoofing. It uses cryptographic signatures to verify that responses originate from the chosen DNS resolver and haven't been tampered with.
+
+More information at [https://dnscrypt.org/](https://dnscrypt.org/)
+
 #### Features
 
 - Randomize the provider at runtime
@@ -16,7 +22,7 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 0) Update Brew
 ```brew update && brew upgrade```
 
-1) Install DNSCrypt + NodeJS + NPM:
+1) Install DNSCrypt + Node + NPM:
 ```brew install dnscrypt-proxy node npm```
 
 2) Download and run RandomDNS:
