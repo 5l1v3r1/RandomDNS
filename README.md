@@ -16,13 +16,13 @@ RandomDNS simplify and improve the security of DNSCrypt proxy by randomizing the
 0) Update Brew
 ```brew update && brew upgrade```
 
-1) Install DNSCrypt + Node:
+1) Install DNSCrypt + NodeJS + NPM:
 ```brew install dnscrypt-proxy node npm```
 
 2) Download and run RandomDNS:
-```git clone https://github.com/pwnsdx/RandomDNS.git && cd RandomDNS && npm update```
+```npm install -g randomdns```
 
-```sudo DEBUG=* node ./run.js```
+```sudo DEBUG=* randomdns```
 
 3) Set your DNS settings to 127.0.0.1
 
