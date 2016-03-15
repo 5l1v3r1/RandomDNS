@@ -8,7 +8,7 @@ DNSCrypt is a protocol that authenticates communications between a DNS client an
 
 More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
-#### Features
+#### Features of RandomDNS
 
 - Randomize the provider at runtime
 - Use (-E)phemeral keys option
