@@ -59,13 +59,13 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
                 working: true,
                 description: 'IPv6 filter enable/disable the usage of IPv6 servers.',
                 examples: [ "true", "false" ]
-            }, (valuesOriginal, want) => {
-                if(want !== 'false') return valuesOriginal;
+            }, (originalValues, want) => {
+                if(want !== 'false') return originalValues;
                             
                 // Init
                 let value,
                     ipRegex = require('ip-regex'),
-                    values = valuesOriginal;
+                    values = originalValues;
     
                 for(value in values) {
                     
@@ -88,12 +88,12 @@ module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RAN
                 working: true,
                 description: 'Get only servers with no-logging policy.',
                 examples: [ "true", "false" ]
-            }, (valuesOriginal, want) => {
-                if(want !== 'true') return valuesOriginal;
+            }, (originalValues, want) => {
+                if(want !== 'true') return originalValues;
                 
                 // Init
                 let value,
-                    values = valuesOriginal;
+                    values = originalValues;
                 
                 for(value in values) {
                     

@@ -271,8 +271,15 @@ class RandomDNS {
             let runDNSCrypt = () => {
                 
                 // Get a random server in the list
-                let randomChoosenInt = getRandomNumber(result.length - 1);
+                let randomChoosenInt = getRandomNumber(result.length + 1);
                 let pickedServer = result[randomChoosenInt];
+                
+                // Prevent a crash
+                if(typeof pickedServer == 'undefined') {
+                    coreDebug(`An unknown error occurred.`);
+                    runDNSCrypt();
+                    return false;
+                }
                 
                 // Show informations about the resolver
                 coreDebug(`OK. Taking ${pickedServer[RANDOMDNS_NAME]} based in ${pickedServer[RANDOMDNS_LOCATION]}`);
