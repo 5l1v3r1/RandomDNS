@@ -104,9 +104,9 @@ class RandomDNS {
     }
     
     // Generate non cryptographically secure random number by using Mersenne Twister
-    getRandomNumber(maxInt) {
+    getRandomNumber(maxInt, minInt) {
         return random
-            .integer(0, maxInt)(random.engines.mt19937().autoSeed());
+            .integer(minInt || 0, maxInt)(random.engines.mt19937().autoSeed());
     }
     
     // Check hash of a file
@@ -271,12 +271,12 @@ class RandomDNS {
             let runDNSCrypt = () => {
                 
                 // Get a random server in the list
-                let randomChoosenInt = getRandomNumber(result.length + 1);
+                let randomChoosenInt = getRandomNumber(result.length, 1);
                 let pickedServer = result[randomChoosenInt];
                 
                 // Prevent a crash
                 if(typeof pickedServer == 'undefined') {
-                    coreDebug(`An unknown error occurred.`);
+                    coreDebug(`An unknown error occurred while reading the entry.`);
                     runDNSCrypt();
                     return false;
                 }
