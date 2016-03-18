@@ -12,10 +12,13 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
 - Randomize the provider at runtime
 - Use (-E)phemeral keys option
-- Securely run DNSCrypt proxy by verifying its hash and by copying it in /tmp dir with restricted permissions
+- Securely run DNSCrypt proxy by verifying its hash, by copying it in /tmp dir with restricted permissions and by launching it as "nobody" user (if reverse proxy is enabled).
 - Watch the proxy process and relaunch it if it dies
+- Can run multiple instances of DNSCrypt and load balance the traffic (EdgeDNS)
+- Have in-memory caching of DNS requests along with Consistent Hashing (EdgeDNS)
 - Can filter the server list by protocols, country and much more
 - Rotate the server with a defined time (default: 10 minutes)
+- Support DNSSEC (EdgeDNS)
 
 #### How to use it
 
@@ -60,5 +63,4 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 ##### ToDo
 
 - Add filters: by country, by port
-
-(\*\*) *Thanks [@jedisct1](https://github.com/jedisct1) for the ideas.*
+- Scramble monitoring of DNS traffic by sending fake DNS requests randomly
