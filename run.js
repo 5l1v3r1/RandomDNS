@@ -53,10 +53,8 @@ const assert    = require('assert'),
       async     = require('async'),
       csv       = require('csv'),
       filters   = require('cookie'),
-      random    = require('random-js');
-
-// Core debug
-const coreDebug = debug('core');
+      random    = require('random-js'),
+      coreDebug = debug('core');
 
 class RandomDNS {
 
@@ -64,7 +62,6 @@ class RandomDNS {
 
         // Splash
         console.log(new Buffer('DQogICBfX18gICAgICAgICAgICAgICBfXyAgICAgICAgICAgX19fICBfICBfX19fX18NCiAgLyBfIFxfX18gX19fXyAgX19fLyAvX18gIF9fIF8gIC8gXyBcLyB8LyAvIF9fLw0KIC8gLCBfLyBfIGAvIF8gXC8gXyAgLyBfIFwvICAnIFwvIC8vIC8gICAgL1wgXCAgDQovXy98X3xcXyxfL18vL18vXF8sXy9cX19fL18vXy9fL19fX18vXy98Xy9fX18vICANCg==', 'base64').toString('ascii'));
-
         cli.version(require('./package.json').version)
             .usage('[options] [file]')
             .option('-L, --listenOn [string]', 'Listen on a specific interface/port [default: 127.0.0.1:53]', '127.0.0.1:53')
@@ -112,7 +109,7 @@ class RandomDNS {
         return (process.getuid && process.getuid() === 0);
     }
 
-    // Generate non cryptographically secure random number by using Mersenne Twister
+    // Generate non cryptographically secure random number by using the Mersenne Twister
     getRandomNumber(maxInt, minInt) {
         return random
             .integer(minInt || 0, maxInt)(random.engines.mt19937().autoSeed());
@@ -144,19 +141,20 @@ class RandomDNS {
 
             if(typeof filterObject == 'object') {
 
-                // Skip if the filter is flagged as not working
+                // Skip the filter if it's flagged as not working
                 if(!filterObject[0].working) {
                     continue;
                 }
 
-                // Pattern found, send server list to the function
-                coreDebug('Sending datas to ' + filter + '...');
+                // Pattern found, send the server list to the filter
+                coreDebug(`Sending datas to "${filter}"...`);
                 serverList = filterObject[1](serverList, userFilters[filter])
-                    .filter((a) => {return typeof a !== 'undefined';}); // Remove deleted values with JS filter function
+                    .filter((a) => { return typeof a !== 'undefined'; }); // Remove deleted values with JS filter() function
+
                 continue;
             }
 
-            coreDebug('Skipping unknown "' + filter + '" filter.');
+            coreDebug(`Skipping unknown "${filter}" filter.`);
         }
 
         return serverList;
@@ -165,11 +163,11 @@ class RandomDNS {
 
         let filtersToShow = this.filters(),
             prtConsole = ((string, tabulationCount) => {
-                console.log(('  '.repeat(tabulationCount || 0)) + string);
+                console.log((`  `.repeat(tabulationCount || 0)) + string);
             });
 
-        prtConsole('Available filters:');
-        prtConsole('');
+        prtConsole(`Available filters:`);
+        prtConsole(``);
 
         // Print them
         let filter, example;
@@ -180,17 +178,17 @@ class RandomDNS {
                 continue;
             }
 
-            prtConsole(filter + ':', 2);
+            prtConsole(`${filter}:`, 2);
 
             let filterDescription = filtersToShow[filter][0].description,
                 filterExamples = filtersToShow[filter][0].examples;
 
-            prtConsole('Description: ' + filterDescription, 3);
-            prtConsole('');
-            prtConsole('Examples:', 3);
+            prtConsole(`Description: ${filterDescription}`, 3);
+            prtConsole(``);
+            prtConsole(`Examples:`, 3);
 
             for(example in filterExamples) {
-                prtConsole('--filters="'+ filter + '=' + filterExamples[example] + ';"', 4);
+                prtConsole(`--filters="${filter}=${filterExamples[example]};"`, 4);
             }
 
             prtConsole('');
@@ -232,7 +230,7 @@ class RandomDNS {
               ), 'Failed to check integrity of edgedns, aborting');
             }
 
-            // Show the server rotation setting if set
+            // Print the server rotation setting if set
             if(cli.rotationTime != 0) {
                 coreDebug(`Server rotation set to ${cli.rotationTime} seconds`);
             }
@@ -257,7 +255,7 @@ class RandomDNS {
                 mode: 500 // Set chmod to Execute+Read-only for the owner
               }, () => {
 
-                // Set chown to nobody:nogroup if reverseProxy is activated in order to reduce surface attack
+                // Set chown to nobody:nogroup if reverse proxy is enabled in order to reduce surface attack
                 if(cli.reverseProxy) {
 
                   let userid = require('userid');
@@ -297,10 +295,10 @@ class RandomDNS {
 
         ], (err, serverListParsed) => {
 
-            // Get server list content
+            // Get the server list
             let result = serverListParsed[2];
 
-            // Remove descriptions rows
+            // Remove columns rows
             delete result[0];
 
             // Apply filters (if any)
@@ -326,13 +324,14 @@ class RandomDNS {
                     masterProcess = spawn(options.edgeDnsFileTmp, masterArgs);
 
                 // ToDo: Rerun if Down
-                // ToDo: Check for high packet loss nodes and rerun them if necessary
+                // ToDo: Check for high packet loss nodes and rerun them if necessary by using EdgeDNS REST API http://127.0.0.1:8888/varz
 
                 // Print the command that has been executed
                 coreDebug(`Running ${options.edgeDnsFileTmp} ${masterArgs.join(' ')}...`);
             },
             runDNSCrypt = (childNumber, childPortNumber, lastPickedServer) => {
 
+                // Debug var
                 let childDebug = debug('proxy:' + childNumber);
 
                 if(typeof lastPickedServer == 'undefined') lastPickedServer = -1;
@@ -382,7 +381,7 @@ class RandomDNS {
                 // Run the child process
                 let childProcess = false;
                 if(cli.reverseProxy) {
-                  // For security, run DNSCrypt as nobody if reverse proxy is activated
+                  // For extra security, run DNSCrypt as nobody if reverse proxy is enabled
                   childProcess = spawn('/usr/bin/sudo', sudoArgs.concat(childArgs));
                 } else {
                   childProcess = spawn(options.dnscryptFileTmp, childArgs);
@@ -397,7 +396,7 @@ class RandomDNS {
 
                 childProcess.stdout.on('data', (data) => {
 
-                    // Stringify datas
+                    // Stringify the datas
                     data = data.toString('utf8').trim();
 
                     // Health check: Detect dead/unreachable server
@@ -441,13 +440,14 @@ class RandomDNS {
               }
 
               runEdgeDNS(tableOfUsedPorts);
-            } else {
-              // Run one instance of DNSCrypt without reverse proxy (EdgeDNS)
-              runDNSCrypt(1, 53);
+              return true;
             }
+
+            // As reverse proxy is disabled, run only one instance of DNSCrypt as root
+            runDNSCrypt(1, 53);
         });
     }
 };
 
-// Start randomDNS
+// Start RandomDNS
 (new RandomDNS()).run();
