@@ -255,10 +255,15 @@ class RandomDNS {
               }, () => {
 
                 // Set chown to nobody:nogroup if reverseProxy is activated in order to reduce surface attack
-                let userid = require('userid');
-                fs.chown(options.dnscryptFileTmp, userid.uid('nobody'), userid.gid('nobody'), () => {
-                    callback();
-                });
+                if(cli.reverseProxy) {
+                  let userid = require('userid');
+                  fs.chown(options.dnscryptFileTmp, userid.uid('nobody'), userid.gid('nobody'), () => {
+                      callback();
+                  });
+                } else {
+                  callback();
+                }
+              }
               });
             },
 
