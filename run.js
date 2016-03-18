@@ -86,7 +86,7 @@ class RandomDNS {
         // Hashes of external files
         this.hashTable = {
           'dnscrypt-proxy':           cli.binaryDNSCryptFileSignature,
-          'edgedns':                  cli.binaryEdgeDNSFile,
+          'edgedns':                  cli.binaryEdgeDNSFileSignature,
           'dnscrypt-resolvers.csv':   cli.resolverListFileSignature
         };
 
@@ -100,7 +100,7 @@ class RandomDNS {
         // Options
         this.options = {
           dnscryptFile:                 fs.readFileSync(cli.binaryDNSCryptFile),
-          edgeDnsFile:                  fs.readFileSync(cli.binaryEdgeDNSFile),
+          edgeDnsFile:                  (cli.reverseProxy ? fs.readFileSync(cli.binaryEdgeDNSFile) : false),
           serverListFile:               fs.readFileSync(cli.resolverListFile),
           dnscryptFileTmp:              '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000),
           edgeDnsFileTmp:               '/tmp/edgedns-' + this.getRandomNumber(1000000)
@@ -225,9 +225,12 @@ class RandomDNS {
             assert((
                 this.createSignature(this.options.serverListFile) == this.hashTable['dnscrypt-resolvers.csv']
             ), 'Failed to check integrity of dnscrypt-resolvers.csv, aborting');
-            assert((
-                this.createSignature(this.options.serverListFile) == this.hashTable['dnscrypt-resolvers.csv']
-            ), 'Failed to check integrity of dnscrypt-resolvers.csv, aborting');
+
+            if(cli.reverseProxy) {
+              assert((
+                  this.createSignature(this.options.edgeDnsFile) == this.hashTable['edgedns']
+              ), 'Failed to check integrity of edgedns, aborting');
+            }
 
             // Show the server rotation setting if set
             if(cli.rotationTime != 0) {
@@ -256,14 +259,15 @@ class RandomDNS {
 
                 // Set chown to nobody:nogroup if reverseProxy is activated in order to reduce surface attack
                 if(cli.reverseProxy) {
+
                   let userid = require('userid');
                   fs.chown(options.dnscryptFileTmp, userid.uid('nobody'), userid.gid('nobody'), () => {
                       callback();
                   });
+
                 } else {
                   callback();
                 }
-              }
               });
             },
 
@@ -322,6 +326,7 @@ class RandomDNS {
                     masterProcess = spawn(options.edgeDnsFileTmp, masterArgs);
 
                 // ToDo: Rerun if Down
+                // ToDo: Check for high packet loss nodes and rerun them if necessary
 
                 // Print the command that has been executed
                 coreDebug(`Running ${options.edgeDnsFileTmp} ${masterArgs.join(' ')}...`);
