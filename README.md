@@ -46,18 +46,26 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
      Usage: run [options] [file]
 
+     Usage: run [options] [file]
+
      Options:
 
-   	-h, --help                            output usage information
-   	-V, --version                         output the version number
-   	-L, --listenOn [string]               Listen on a specific interface/port [default: 127.0.0.1:53]
-   	-R, --rotationTime [int]              Define the time to wait before rotating the server (in seconds) [default: 600 seconds]
-   	-F, --filters [object]                Use filters [default: IPv6=false;]
-   	--filters-help                        Get full list of available filters.
-   	-b, --binaryFile [string]             Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.
-   	--binaryFileSignature [string]        SHA512 hash of the DNSCrypt binary.
-   	-r, --resolverListFile [string]       Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
-   	--resolverListFileSignature [string]  SHA512 hash of the DNSCrypt resolver list file.
+       -h, --help                              output usage information
+       -V, --version                           output the version number
+       -L, --listenOn [string]                 Listen on a specific interface/port [default: 127.0.0.1:53]
+       -R, --rotationTime [int]                Define the time to wait before rotating the server (in seconds) [default: 600 seconds]
+       -P, --reverseProxy [bool]               Enable EdgeDNS reverse proxy [default: false]
+       --reverseProxyChildStartPort [int]      Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]
+       -T, --threads [int]                     Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]
+       -F, --filters [string]                  Use filters [default: IPv6=false;]
+       --filters-help                          Get full list of available filters.
+       -b, --binaryDNSCryptFile [string]       Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.
+       --binaryDNSCryptFileSignature [string]  SHA512 hash of the DNSCrypt binary.
+       -b, --binaryEdgeDNSFile [string]        Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.
+       --binaryEdgeDNSFileSignature [string]   SHA512 hash of the EdgeDNS binary.
+       -r, --resolverListFile [string]         Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
+       --resolverListFileSignature [string]    SHA512 hash of the DNSCrypt resolver list file.
+
 ```
 
 ##### ToDo
