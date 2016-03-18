@@ -1,10 +1,10 @@
 {
   "name": "randomdns",
-  "version": "1.2.4",
+  "version": "1.3.0",
   "description": "RandomDNS aims to improve the security, privacy and anonymity of DNSCrypt.",
   "main": "run.js",
   "bin": {
-      "randomdns": "./run.js"
+    "randomdns": "./run.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,6 +18,7 @@
     "csv": "^0.4.6",
     "debug": "^2.2.0",
     "ip-regex": "^1.0.3",
-    "random-js": "^1.0.8"
+    "random-js": "^1.0.8",
+    "userid": "^0.2.0"
   }
 }
