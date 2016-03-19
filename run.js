@@ -78,7 +78,7 @@ class RandomDNS {
             .option('--binaryEdgeDNSFileSignature [string]', 'SHA512 hash of the EdgeDNS binary.', '59bc3da17f5ae2d7c69a48b92a69fb3556155fbffc27394d34dc376dcbf175c6790bd2bb5cc4c9825198c449c113f8735b29d7f42c6103c3941b108bb81af99b')
             .option('-r, --resolverListFile [string]', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
             .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', '43b3000ce24390314b137109c85c4cf72b6d26e3269029e28d2beb0e1cb6c2b06725fff3858e86e7726a0cc6ed4152fb670d62cc3fa8610b609c22b9b68af273')
-            .parse(process.argv);
+        .parse(process.argv);
 
         // Hashes of external files
         this.hashTable = {
@@ -87,7 +87,7 @@ class RandomDNS {
           'dnscrypt-resolvers.csv':   cli.resolverListFileSignature
         };
 
-        // Set as the right boolean value for reverseProxy
+        // Set boolean value for reverseProxy
         if(cli.reverseProxy === 'false') {
           cli.reverseProxy = false;
         } else if(cli.reverseProxy === 'true') {
@@ -255,17 +255,17 @@ class RandomDNS {
                 mode: 500 // Set chmod to Execute+Read-only for the owner
               }, () => {
 
-                // Set chown to nobody:nogroup if reverse proxy is enabled in order to reduce surface attack
-                if(cli.reverseProxy) {
-
-                  let userid = require('userid');
-                  fs.chown(options.dnscryptFileTmp, userid.uid('nobody'), userid.gid('nobody'), () => {
-                      callback();
-                  });
-
-                } else {
+                // Do not chown the binary if the reverseProxy option is disabled
+                if(!cli.reverseProxy) {
                   callback();
+                  return false;
                 }
+
+                // Set chown to nobody:nogroup if reverse proxy is enabled in order to reduce surface attack
+                let userid = require('userid');
+                fs.chown(options.dnscryptFileTmp, userid.uid('nobody'), userid.gid('nobody'), () => {
+                  callback();
+                });
               });
             },
 
@@ -388,9 +388,11 @@ class RandomDNS {
                 }
 
                 // Rotate the provider in a predefined time
-                if(cli.rotationTime != 0) {
+                if(cli.rotationTime !== 0) {
                     setTimeout(() => {
-                        childProcess.kill('SIGINT');
+                       childProcess.stdin.pause();
+                       process.kill(childProcess.pid);
+                       childProcess = null;
                     }, (cli.rotationTime * 1000));
                 }
 
@@ -403,7 +405,11 @@ class RandomDNS {
                     let healthCheckOnConnectionError = /Unable to retrieve server certificates/g;
                     if(healthCheckOnConnectionError.test(data)) {
                         childDebug('Server is unreachable!');
-                        childProcess.kill('SIGINT');
+
+                        childProcess.stdin.pause();
+                        process.kill(childProcess.pid);
+                        childProcess = null;
+
                         return false;
                     }
 
@@ -416,7 +422,7 @@ class RandomDNS {
 
                 childProcess.on('close', (code) => {
 
-                    if(code == null) {
+                    if(code === null || code === 143 /* Killed from process with reverse proxy */) {
                       childDebug(`Rotating the server...`);
                     } else {
                       childDebug(`DNSCrypt proxy exited with code ${code}! Re-running it...`);

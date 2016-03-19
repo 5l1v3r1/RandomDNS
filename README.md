@@ -46,8 +46,6 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
      Usage: run [options] [file]
 
-     Usage: run [options] [file]
-
      Options:
 
        -h, --help                              output usage information
