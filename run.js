@@ -78,19 +78,19 @@ class Core {
     }
 
     // Options
-    this.options = {
-      dnscryptFile:     fs.readFileSync(cli.binaryDNSCryptFile),
-      edgeDnsFile:      (cli.reverseProxy ? fs.readFileSync(cli.binaryEdgeDNSFile) : false),
-      serverListFile:   fs.readFileSync(cli.resolverListFile),
-      dnscryptFileTmp:  '/tmp/dnscrypt-proxy-' + tools.getRandomNumber(1000000),
-      edgeDnsFileTmp:   '/tmp/edgedns-' + tools.getRandomNumber(1000000)
+    this.files = {
+      'dnscrypt-proxy':           fs.readFileSync(cli.binaryDNSCryptFile),
+      'edgedns':                  (cli.reverseProxy ? fs.readFileSync(cli.binaryEdgeDNSFile) : false),
+      'dnscrypt-resolvers.csv':   fs.readFileSync(cli.resolverListFile),
+      dnscryptFileTmp:            '/tmp/dnscrypt-proxy-' + tools.getRandomNumber(1000000),
+      edgeDnsFileTmp:             '/tmp/edgedns-' + tools.getRandomNumber(1000000)
     };
   }
 
   run() {
 
     // Load dependencies
-    const options           = this.options,
+    const options           = this.files,
           getRandomNumber   = tools.getRandomNumber;
 
     // Show available filters?
@@ -107,22 +107,19 @@ class Core {
       assert(tools.isRoot(), 'Sorry but you must run this program as root so I can run dnscrypt-proxy on the DNS port.');
 
       // Ensure integrity of files
-      assert((
-        tools.createSignature(this.options.dnscryptFile) == this.hashTable['dnscrypt-proxy']
-      ), 'Failed to check integrity of dnscrypt-proxy, aborting');
-      assert((
-        tools.createSignature(this.options.serverListFile) == this.hashTable['dnscrypt-resolvers.csv']
-      ), 'Failed to check integrity of dnscrypt-resolvers.csv, aborting');
+      for (let _iterator = ['dnscrypt-proxy', 'dnscrypt-resolvers.csv', 'edgedns'][Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+        let file = _step.value;
 
-      if(cli.reverseProxy) {
+        // Special case for EdgeDNS file
+        if(file == 'edgedns') {
+          if(!cli.reverseProxy) {
+            continue;
+          }
+        }
+
         assert((
-          tools.createSignature(this.options.edgeDnsFile) == this.hashTable['edgedns']
-        ), 'Failed to check integrity of edgedns, aborting');
-      }
-
-      // Print the server rotation setting (if set)
-      if(cli.rotationTime != 0) {
-        coreDebug(`Server rotation set to ${cli.rotationTime} seconds`);
+          tools.createSignature(this.files[file]) == this.hashTable[file]
+        ), `Failed to check integrity of ${file}, aborting`);
       }
 
     } catch(e) {
@@ -136,12 +133,17 @@ class Core {
       return false;
     }
 
+    // Print the server rotation setting (if set)
+    if(cli.rotationTime != 0) {
+      coreDebug(`Server rotation set to ${cli.rotationTime} seconds`);
+    }
+
     async.series([
 
       (callback) => {
 
         // Write DNSCrypt binary in /tmp as root with restricted permissions
-        fs.writeFile(options.dnscryptFileTmp, options.dnscryptFile, {
+        fs.writeFile(options.dnscryptFileTmp, options['dnscrypt-proxy'], {
           mode: 500 // Set chmod to Execute+Read-only for the owner
         }, () => {
 
@@ -168,7 +170,7 @@ class Core {
         }
 
         // Write EdgeDNS binary in /tmp as root with restricted permissions
-        fs.writeFile(options.edgeDnsFileTmp, options.edgeDnsFile, {
+        fs.writeFile(options.edgeDnsFileTmp, options['edgedns'], {
           mode: 500 // Set chmod to Execute+Read-only for the owner
         }, () => {
           callback();
@@ -177,7 +179,7 @@ class Core {
 
       // Parse the CSV
       (callback) => {
-        csv.parse(options.serverListFile, (err, data) => {
+        csv.parse(options['dnscrypt-resolvers.csv'], (err, data) => {
           if (err) throw err;
           callback(false, data);
         });
