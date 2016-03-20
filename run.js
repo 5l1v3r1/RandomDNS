@@ -6,7 +6,6 @@
  *  / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \
  * /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/
  *
- * Version: 1.2 (Alpha)
  * Author: Sabri Haddouche <sabri@riseup.net>
  *
  * This project is my first project who use ES6 so please be kind with critics!
@@ -27,36 +26,20 @@
 
 "use strict";
 
-// Define server list rows
-const RANDOMDNS_NAME = 0,
-      RANDOMDNS_FULLNAME = 1,
-      RANDOMDNS_DESCRIPTION = 2,
-      RANDOMDNS_LOCATION = 3,
-      RANDOMDNS_COORDINATES = 4,
-      RANDOMDNS_URL = 5,
-      RANDOMDNS_VERSION = 6,
-      RANDOMDNS_DNSSEC_VALIDATION = 7,
-      RANDOMDNS_NO_LOG = 8,
-      RANDOMDNS_NAMECOIN = 9,
-      RANDOMDNS_RESOLVER_ADDRESS = 10,
-      RANDOMDNS_PROVIDER_NAME = 11,
-      RANDOMDNS_PROVIDER_PUBLICKEY = 12,
-      RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD = 13;
-
 // Import dependencies
-const assert    = require('assert'),
-      crypto    = require('crypto'),
+const defines   = require('./defines'),
+      assert    = require('assert'),
       path      = require('path'),
       fs        = require('fs'),
       cli       = require('commander'),
       debug     = require('debug'),
       async     = require('async'),
       csv       = require('csv'),
-      filters   = require('cookie'),
-      random    = require('random-js'),
+      filters   = require('./filters'),
+      tools     = require('./tools'),
       coreDebug = debug('core');
 
-class RandomDNS {
+class Core {
 
   constructor() {
 
@@ -99,136 +82,45 @@ class RandomDNS {
       dnscryptFile:                 fs.readFileSync(cli.binaryDNSCryptFile),
       edgeDnsFile:                  (cli.reverseProxy ? fs.readFileSync(cli.binaryEdgeDNSFile) : false),
       serverListFile:               fs.readFileSync(cli.resolverListFile),
-      dnscryptFileTmp:              '/tmp/dnscrypt-proxy-' + this.getRandomNumber(1000000),
-      edgeDnsFileTmp:               '/tmp/edgedns-' + this.getRandomNumber(1000000)
+      dnscryptFileTmp:              '/tmp/dnscrypt-proxy-' + tools.getRandomNumber(1000000),
+      edgeDnsFileTmp:               '/tmp/edgedns-' + tools.getRandomNumber(1000000)
     };
-  }
-
-  // Check if the current user is root
-  isRoot() {
-    return (process.getuid && process.getuid() === 0);
-  }
-
-  // Generate non cryptographically secure random number by using the Mersenne Twister
-  getRandomNumber(maxInt, minInt) {
-    return random
-      .integer(minInt || 0, maxInt)(random.engines.mt19937().autoSeed());
-  }
-
-  // Check hash of a file
-  createSignature(datas, algorithm, encoding) {
-    return crypto
-      .createHash(algorithm || 'sha512')
-      .update(datas, 'utf8')
-      .digest(encoding || 'hex')
-  }
-
-  // Filters part (may be soon moved in a plugins system)
-  filters() {
-    return require('./filters')(RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RANDOMDNS_LOCATION, RANDOMDNS_COORDINATES, RANDOMDNS_URL, RANDOMDNS_VERSION, RANDOMDNS_DNSSEC_VALIDATION, RANDOMDNS_NO_LOG, RANDOMDNS_NAMECOIN, RANDOMDNS_RESOLVER_ADDRESS, RANDOMDNS_PROVIDER_NAME, RANDOMDNS_PROVIDER_PUBLICKEY, RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD);
-  }
-  applyFilters(serverList) {
-
-    let filter,
-        userFilters         = filters.parse(cli.filters),
-        availableFilters    = this.filters();
-
-    for(filter in userFilters) {
-
-      // Lowercase the filter name
-      let filterNameNormalized = filter.toLowerCase(),
-          filterObject = availableFilters[filterNameNormalized];
-
-      if(typeof filterObject == 'object') {
-
-        // Skip the filter if it's flagged as not working
-        if(!filterObject[0].working) {
-          continue;
-        }
-
-        // Pattern found, send the server list to the filter
-        coreDebug(`Sending datas to "${filter}"...`);
-        serverList = filterObject[1](serverList, userFilters[filter])
-          .filter((a) => { return typeof a !== 'undefined'; }); // Remove empty (deleted) values with JS filter() function
-
-        continue;
-      }
-
-      coreDebug(`Skipping unknown "${filter}" filter.`);
-    }
-
-    return serverList;
-  }
-  showFilters() {
-
-    let filtersToShow = this.filters(),
-        prtConsole = ((string, tabulationCount) => {
-          console.log((`  `.repeat(tabulationCount || 0)) + string);
-        });
-
-    prtConsole(`Available filters:`);
-    prtConsole(``);
-
-    // Print them
-    let filter, example;
-    for(filter in filtersToShow) {
-
-      // Skip if the filter is flagged as not working
-      if(!filtersToShow[filter][0].working) {
-        continue;
-      }
-
-      prtConsole(`${filter}:`, 2);
-
-      let filterDescription = filtersToShow[filter][0].description,
-      filterExamples = filtersToShow[filter][0].examples;
-
-      prtConsole(`Description: ${filterDescription}`, 3);
-      prtConsole(``);
-      prtConsole(`Examples:`, 3);
-
-      for(example in filterExamples) {
-        prtConsole(`--filters="${filter}=${filterExamples[example]};"`, 4);
-      }
-
-      prtConsole('');
-    }
   }
 
   run() {
 
     // Load dependencies
-    const options       = this.options,
-          getRandomNumber   = this.getRandomNumber,
-          applyFilters      = this.applyFilters;
+    const options           = this.options,
+          getRandomNumber   = tools.getRandomNumber;
 
     // Show available filters?
-    if((typeof cli.filtersHelp != 'undefined') && cli.filtersHelp) {
-      this.showFilters();
+    if((typeof cli.filtersHelp != 'undefined') &&
+        cli.filtersHelp) {
+      filters.show();
       return false;
     }
 
-    // Runtime checks
+    // Boot checks
     try {
 
       // Check if the program is run as root
-      assert(this.isRoot(), 'Sorry but you must run this program as root so I can run dnscrypt-proxy on the DNS port.');
+      assert(tools.isRoot(), 'Sorry but you must run this program as root so I can run dnscrypt-proxy on the DNS port.');
 
       // Ensure integrity of files
       assert((
-        this.createSignature(this.options.dnscryptFile) == this.hashTable['dnscrypt-proxy']
+        tools.createSignature(this.options.dnscryptFile) == this.hashTable['dnscrypt-proxy']
       ), 'Failed to check integrity of dnscrypt-proxy, aborting');
       assert((
-        this.createSignature(this.options.serverListFile) == this.hashTable['dnscrypt-resolvers.csv']
+        tools.createSignature(this.options.serverListFile) == this.hashTable['dnscrypt-resolvers.csv']
       ), 'Failed to check integrity of dnscrypt-resolvers.csv, aborting');
 
       if(cli.reverseProxy) {
         assert((
-          this.createSignature(this.options.edgeDnsFile) == this.hashTable['edgedns']
+          tools.createSignature(this.options.edgeDnsFile) == this.hashTable['edgedns']
         ), 'Failed to check integrity of edgedns, aborting');
       }
 
-      // Print the server rotation setting if set
+      // Print the server rotation setting (if set)
       if(cli.rotationTime != 0) {
         coreDebug(`Server rotation set to ${cli.rotationTime} seconds`);
       }
@@ -301,7 +193,7 @@ class RandomDNS {
 
       // Apply filters (if any)
       if((typeof cli.filters == 'string') && (cli.filters != '')) {
-        result = this.applyFilters(result);
+        result = filters.apply(result);
       }
 
       // List number of available servers
@@ -352,11 +244,11 @@ class RandomDNS {
         }
 
         // Show informations about the resolver
-        childDebug(`OK. Taking ${pickedServer[RANDOMDNS_NAME]} based in ${pickedServer[RANDOMDNS_LOCATION]}`);
-        childDebug(`Full name: ${pickedServer[RANDOMDNS_FULLNAME]}`);
-        childDebug('Do they log? ' + (pickedServer[RANDOMDNS_NO_LOG] == 'yes' ? 'No' : 'Yes'));
-        childDebug(`Resolver Address: ${pickedServer[RANDOMDNS_RESOLVER_ADDRESS]}`);
-        childDebug(`Public Key: ${pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]}`);
+        childDebug(`OK. Taking ${pickedServer[defines.RANDOMDNS_NAME]} based in ${pickedServer[defines.RANDOMDNS_LOCATION]}`);
+        childDebug(`Full name: ${pickedServer[defines.RANDOMDNS_FULLNAME]}`);
+        childDebug('Do they log? ' + (pickedServer[defines.RANDOMDNS_NO_LOG] == 'yes' ? 'No' : 'Yes'));
+        childDebug(`Resolver Address: ${pickedServer[defines.RANDOMDNS_RESOLVER_ADDRESS]}`);
+        childDebug(`Public Key: ${pickedServer[defines.RANDOMDNS_PROVIDER_PUBLICKEY]}`);
 
         // Define args
         let sudoArgs = [
@@ -369,11 +261,11 @@ class RandomDNS {
           '127.0.0.1:' + childPortNumber,
           '-E', // Use ephemeral keys
           '-r',
-          pickedServer[RANDOMDNS_RESOLVER_ADDRESS],
+          pickedServer[defines.RANDOMDNS_RESOLVER_ADDRESS],
           '--provider-name',
-          pickedServer[RANDOMDNS_PROVIDER_NAME],
+          pickedServer[defines.RANDOMDNS_PROVIDER_NAME],
           '--provider-key',
-          pickedServer[RANDOMDNS_PROVIDER_PUBLICKEY]
+          pickedServer[defines.RANDOMDNS_PROVIDER_PUBLICKEY]
         ];
 
         // Run the child process
@@ -388,7 +280,6 @@ class RandomDNS {
         // Rotate the provider in a predefined time
         if(cli.rotationTime !== 0) {
           setTimeout(() => {
-            childProcess.stdin.pause();
             process.kill(childProcess.pid);
             childProcess = null;
           }, (cli.rotationTime * 1000));
@@ -404,7 +295,6 @@ class RandomDNS {
           if(healthCheckOnConnectionError.test(data)) {
             childDebug('Server is unreachable!');
 
-            childProcess.stdin.pause();
             process.kill(childProcess.pid);
             childProcess = null;
 
@@ -423,7 +313,7 @@ class RandomDNS {
           if(code === null || code === 143 /* Killed from process with reverse proxy */) {
             childDebug(`Rotating the server...`);
           } else {
-            childDebug(`DNSCrypt proxy exited with code ${code}! Re-running it...`);
+            childDebug(`DNSCrypt proxy exited with code ${code}! Restarting...`);
           }
 
           setTimeout(() => {
@@ -454,4 +344,4 @@ class RandomDNS {
 };
 
 // Start RandomDNS
-(new RandomDNS()).run();
+(new Core()).run();

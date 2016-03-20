@@ -1,8 +1,8 @@
 /*
  *    ___               __           ___  _  ______
  *   / _ \___ ____  ___/ /__  __ _  / _ \/ |/ / __/
- *  / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \  
- * /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
+ *  / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \
+ * /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/
  *
  * Author: Sabri Haddouche <sabri@riseup.net>
  *
@@ -24,94 +24,85 @@
 
 "use strict";
 
-const debug         = require('debug'),
-      filtersDebug  = debug('filters');
+const cli           = require('commander'),
+      defines       = require('./defines'),
+      debug         = require('debug'),
+      coreDebug     = debug('filters');
 
-module.exports = (RANDOMDNS_NAME, RANDOMDNS_FULLNAME, RANDOMDNS_DESCRIPTION, RANDOMDNS_LOCATION, RANDOMDNS_COORDINATES, RANDOMDNS_URL, RANDOMDNS_VERSION, RANDOMDNS_DNSSEC_VALIDATION, RANDOMDNS_NO_LOG, RANDOMDNS_NAMECOIN, RANDOMDNS_RESOLVER_ADDRESS, RANDOMDNS_PROVIDER_NAME, RANDOMDNS_PROVIDER_PUBLICKEY, RANDOMDNS_PROVIDER_PUBLICKEY_TXTRECORD) => {
-    
-    return {
-                
-        country: [
-            {
-                working: false,
-                description: 'Country filter only take servers in countries that you want.',
-                examples: [
-                    '*,EXCEPT(CH,FR)',
-                    'CH,FR'
-                ]
-            },
-            (values, want) => {
-                
-                // Get the country to 2-letter code
-                let countryToTwoLetterCode = require('./ISO-3166-Countries-with-Regional-Codes/slim-2.json');
-    
-                // Filter
-                let countriesNeeded = want.split(',');
-                
-                console.log(countriesNeeded);
-    
-                return values;
-            }
-        ],
-    
-        ipv6: [
-            {
-                working: true,
-                description: 'IPv6 filter enable/disable the usage of IPv6 servers.',
-                examples: [ "true", "false" ]
-            }, (originalValues, want) => {
-                if(want !== 'false') return originalValues;
-                            
-                // Init
-                let value,
-                    ipRegex = require('ip-regex'),
-                    values = originalValues;
-    
-                for(value in values) {
-                    
-                    // Get server infos
-                    let serverInfo = values[value];
-                    
-                    // If the IP is not an IPv4 then delete it
-                    if(!ipRegex.v4().test(serverInfo[RANDOMDNS_RESOLVER_ADDRESS])) {
-                        filtersDebug('Deleted ' + serverInfo[RANDOMDNS_FULLNAME]);
-                        delete values[ value ];
-                    }
-                }
-                
-                return values;
-            }
-        ],
-        
-        nolog: [
-            {
-                working: true,
-                description: 'Get only servers with no-logging policy.',
-                examples: [ "true", "false" ]
-            }, (originalValues, want) => {
-                if(want !== 'true') return originalValues;
-                
-                // Init
-                let value,
-                    values = originalValues;
-                
-                for(value in values) {
-                    
-                    // Get server infos
-                    let serverInfo = values[value];
-                    
-                    // If no informations are given about the logging policy, continue
-                    if(typeof serverInfo[RANDOMDNS_NO_LOG] == 'undefined') continue;
-                    
-                    // Delete the entry if the server is logging DNS queries according to DNSCrypt-Proxy
-                    if(serverInfo[RANDOMDNS_NO_LOG].toLowerCase() == 'no') {
-                        filtersDebug('Deleted ' + serverInfo[RANDOMDNS_FULLNAME]);
-                        delete values[ value ];
-                    }
-                }
-                
-                return values;
-            }
-        ]
-    };
+class Filters {
+
+  get() {
+    return require('./filters/formulas')(defines);
+  }
+
+  apply(serverList) {
+
+    let filter,
+        userFilters         = require('cookie').parse(cli.filters),
+        availableFilters    = this.get();
+
+    for(filter in userFilters) {
+
+      // Lowercase the filter name
+      let filterNameNormalized = filter.toLowerCase(),
+          filterObject = availableFilters[filterNameNormalized];
+
+      if(typeof filterObject == 'object') {
+
+        // Skip the filter if it's flagged as not working
+        if(!filterObject[0].working) {
+          continue;
+        }
+
+        // Pattern found, send the server list to the filter
+        coreDebug(`Sending datas to "${filter}"...`);
+        serverList = filterObject[1](serverList, userFilters[filter])
+          .filter((a) => { return typeof a !== 'undefined'; }); // Remove empty (deleted) values with JS filter() function
+
+        continue;
+      }
+
+      coreDebug(`Skipping unknown "${filter}" filter.`);
+    }
+
+    return serverList;
+  }
+
+  show() {
+
+    let filtersToShow = this.get(),
+        prtConsole = ((string, tabulationCount) => {
+          console.log((`  `.repeat(tabulationCount || 0)) + string);
+        });
+
+    prtConsole(`Available filters:`);
+    prtConsole(``);
+
+    // Print them
+    let filter, example;
+    for(filter in filtersToShow) {
+
+      // Skip if the filter is flagged as not working
+      if(!filtersToShow[filter][0].working) {
+        continue;
+      }
+
+      prtConsole(`${filter}:`, 2);
+
+      let filterDescription = filtersToShow[filter][0].description,
+      filterExamples = filtersToShow[filter][0].examples;
+
+      prtConsole(`Description: ${filterDescription}`, 3);
+      prtConsole(``);
+      prtConsole(`Examples:`, 3);
+
+      for(example in filterExamples) {
+        prtConsole(`--filters="${filter}=${filterExamples[example]};"`, 4);
+      }
+
+      prtConsole('');
+    }
+  }
 };
+
+module.exports = new Filters();
