@@ -65,9 +65,9 @@ class Core {
 
     // Hashes of external files
     this.hashTable = {
-      'dnscrypt-proxy':           cli.binaryDNSCryptFileSignature,
-      'edgedns':                  cli.binaryEdgeDNSFileSignature,
-      'dnscrypt-resolvers.csv':   cli.resolverListFileSignature
+      'dnscrypt-proxy':          cli.binaryDNSCryptFileSignature,
+      'edgedns':                 cli.binaryEdgeDNSFileSignature,
+      'dnscrypt-resolvers.csv':  cli.resolverListFileSignature
     };
 
     // Set boolean value for reverseProxy
@@ -79,11 +79,11 @@ class Core {
 
     // Options
     this.options = {
-      dnscryptFile:                 fs.readFileSync(cli.binaryDNSCryptFile),
-      edgeDnsFile:                  (cli.reverseProxy ? fs.readFileSync(cli.binaryEdgeDNSFile) : false),
-      serverListFile:               fs.readFileSync(cli.resolverListFile),
-      dnscryptFileTmp:              '/tmp/dnscrypt-proxy-' + tools.getRandomNumber(1000000),
-      edgeDnsFileTmp:               '/tmp/edgedns-' + tools.getRandomNumber(1000000)
+      dnscryptFile:     fs.readFileSync(cli.binaryDNSCryptFile),
+      edgeDnsFile:      (cli.reverseProxy ? fs.readFileSync(cli.binaryEdgeDNSFile) : false),
+      serverListFile:   fs.readFileSync(cli.resolverListFile),
+      dnscryptFileTmp:  '/tmp/dnscrypt-proxy-' + tools.getRandomNumber(1000000),
+      edgeDnsFileTmp:   '/tmp/edgedns-' + tools.getRandomNumber(1000000)
     };
   }
 
@@ -213,8 +213,14 @@ class Core {
         ],
         masterProcess = spawn(options.edgeDnsFileTmp, masterArgs);
 
-        // ToDo: Rerun if Down
         // ToDo: Check for high packet loss nodes and rerun them if necessary by using EdgeDNS REST API http://127.0.0.1:8888/varz
+        masterProcess.on('close', (code) => {
+          childDebug(`EdgeDNS proxy exited with code ${code}! Restarting...`);
+
+          setTimeout(() => {
+            return runEdgeDNS(tableOfUsedPorts);
+          }, 2500);
+        });
 
         // Print the command that has been executed
         coreDebug(`Running ${options.edgeDnsFileTmp} ${masterArgs.join(' ')}...`);
