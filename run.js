@@ -287,7 +287,7 @@ class Core {
 
         // Rotate the provider in a predefined time
         if(cli.rotationTime !== 0) {
-          setTimeout(() => {
+          let rotateServer = setTimeout(() => {
             process.kill(childProcess.pid);
             childProcess = null;
           }, (cli.rotationTime * 1000));
@@ -303,6 +303,10 @@ class Core {
           if(healthCheckOnConnectionError.test(data)) {
             childDebug('Server is unreachable!');
 
+            // Ensure setTimeout will not be triggered
+            clearTimeout(rotateServer);
+
+            // Kill the process
             process.kill(childProcess.pid);
             childProcess = null;
 
