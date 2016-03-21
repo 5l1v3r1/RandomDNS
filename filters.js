@@ -55,7 +55,7 @@ class Filters {
         }
 
         // Pattern found, send the server list to the filter
-        filtersDebug(`Sending datas to "${filter}"...`);
+        filtersDebug(`Sending datas to "${filter}" filter...`);
         serverList = filterObject[1](serverList, userFilters[filter])
           .filter((a) => { return typeof a !== 'undefined'; }); // Remove empty (deleted) values with JS filter() function
 
