@@ -358,7 +358,7 @@ class Core {
         return true;
       }
 
-      // As reverse proxy is disabled, run only one instance of DNSCrypt on DNS port as root
+      // As reverse proxy is disabled, run only one instance of DNSCrypt as root on the DNS port
       runDNSCrypt(1, 53);
     });
   }
