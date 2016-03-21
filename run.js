@@ -304,11 +304,13 @@ class Core {
             childDebug('Server is unreachable!');
 
             // Ensure setTimeout will not be triggered
-            clearTimeout(rotateServer);
+            if(typeof rotateServer !== 'undefined') clearTimeout(rotateServer);
 
             // Kill the process
-            process.kill(childProcess.pid);
-            childProcess = null;
+            if(childProcess !== null) {
+              process.kill(childProcess.pid);
+              childProcess = null;
+            }
 
             return false;
           }
