@@ -306,10 +306,17 @@ class Core {
             // Ensure setTimeout will not be triggered
             if(typeof rotateServer !== 'undefined') clearTimeout(rotateServer);
 
-            // Kill the process
-            if(childProcess !== null) {
-              process.kill(childProcess.pid);
-              childProcess = null;
+            // Check if childProcess is not undefined
+            if((typeof childProcess !== 'undefined')) {
+
+              // Check if childProcess var has not been already nulled / if there is still a pid
+              if((childProcess !== null) &&
+              (childProcess.pid !== null)) {
+
+                // Kill the process
+                process.kill(childProcess.pid);
+                childProcess = null;
+              }
             }
 
             return false;
