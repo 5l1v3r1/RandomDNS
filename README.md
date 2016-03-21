@@ -12,7 +12,7 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
 - Randomize the provider at runtime
 - Use (-E)phemeral keys option
-- Securely run DNSCrypt proxy by verifying its hash, by copying it in /tmp dir with restricted permissions and by launching it as "nobody" user (if reverse proxy is enabled).
+- Securely run DNSCrypt proxy by verifying its hash, copying it in /tmp dir with restricted permissions and launching it as "nobody" user (if reverse proxy is enabled)
 - Watch the proxy process and relaunch it if it dies
 - Can run multiple instances of DNSCrypt and load balance the traffic (EdgeDNS)
 - Have in-memory caching of DNS requests along with Consistent Hashing (EdgeDNS)
