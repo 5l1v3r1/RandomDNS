@@ -12,25 +12,20 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 
 - Randomize the provider at runtime
 - Use (-E)phemeral keys option
-- Securely run DNSCrypt proxy by verifying its hash and by copying it in /tmp dir with restricted permissions
+- Securely run DNSCrypt proxy by verifying its hash, by copying it in /tmp dir with restricted permissions and by launching it as "nobody" user (if reverse proxy is enabled).
 - Watch the proxy process and relaunch it if it dies
+- Can run multiple instances of DNSCrypt and load balance the traffic (EdgeDNS)
+- Have in-memory caching of DNS requests along with Consistent Hashing (EdgeDNS)
 - Can filter the server list by protocols, country and much more
 - Rotate the server with a defined time (default: 10 minutes)
+- Support DNSSEC (EdgeDNS)
 
 #### How to use it
 
-0) Update Brew
-```brew update && brew upgrade```
-
-1) Install DNSCrypt + Node + NPM:
-```brew install dnscrypt-proxy node npm```
-
-2) Download and run RandomDNS:
-```npm install -g randomdns```
-
-```sudo DEBUG=* randomdns```
-
-3) Set your DNS settings to 127.0.0.1
+1. Update Brew: ```brew update && brew upgrade```
+2. Install DNSCrypt + Node + NPM: ```brew install dnscrypt-proxy node npm```
+3. Download and run RandomDNS: ```npm install -g randomdns && sudo DEBUG=* randomdns```
+4. Set your DNS settings to 127.0.0.1
 
 #### Help
 
@@ -39,36 +34,31 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
      / _ \___ ____  ___/ /__  __ _  / _ \/ |/ / __/
     / , _/ _ `/ _ \/ _  / _ \/  ' \/ // /    /\ \  
    /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
-   
-   
+
+
      Usage: run [options] [file]
-   
+
      Options:
-   
-   	-h, --help                            output usage information
-   	-V, --version                         output the version number
-   	-L, --listenOn [string]               Listen on a specific interface/port [default: 127.0.0.1:53]
-   	-R, --rotationTime [int]              Define the time to wait before rotating the server (in seconds) [default: 600 seconds]
-   	-F, --filters [object]                Use filters [default: IPv6=false;]
-   	--filters-help                        Get full list of available filters.
-   	-b, --binaryFile [string]             Use custom DNSCrypt binary, will not work until --binaryFileSignature is changed.
-   	--binaryFileSignature [string]        SHA512 hash of the DNSCrypt binary.
-   	-r, --resolverListFile [string]       Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
-   	--resolverListFileSignature [string]  SHA512 hash of the DNSCrypt resolver list file.
+
+       -h, --help                              output usage information
+       -V, --version                           output the version number
+       -L, --listenOn [string]                 Listen on a specific interface/port [default: 127.0.0.1:53]
+       -R, --rotationTime [int]                Define the time to wait before rotating the server (in seconds) [default: 600 seconds]
+       -P, --reverseProxy [bool]               Enable EdgeDNS reverse proxy [default: false]
+       --reverseProxyChildStartPort [int]      Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]
+       -T, --threads [int]                     Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]
+       -F, --filters [string]                  Use filters [default: IPv6=false;]
+       --filters-help                          Get full list of available filters.
+       -b, --binaryDNSCryptFile [string]       Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.
+       --binaryDNSCryptFileSignature [string]  SHA512 hash of the DNSCrypt binary.
+       -b, --binaryEdgeDNSFile [string]        Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.
+       --binaryEdgeDNSFileSignature [string]   SHA512 hash of the EdgeDNS binary.
+       -r, --resolverListFile [string]         Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
+       --resolverListFileSignature [string]    SHA512 hash of the DNSCrypt resolver list file.
+
 ```
 
 ##### ToDo
 
-- Add health checks support (if the server does not answer anymore, pick another one) (now detecting dead servers)
 - Add filters: by country, by port
-
-##### Roadmap
-
-- Have in-memory cache support
-- Do a reverse proxy so it can:
-	- Spawn multiples DNSCrypt processes and do DNS requests load balancing
-	- Scramble monitoring of DNS traffic by sending fake DNS requests randomly
-	- Do Consistent Hashing while the program is running (hash DNS requests, save it in memory and when there is a match send it to the same upstream provider) \*\*
-- Add support for DNSSEC (?) \*\*
-
-(\*\*) *Thanks [@jedisct1](https://github.com/jedisct1) for the ideas.*
+- Scramble monitoring of DNS traffic by sending fake DNS requests randomly
