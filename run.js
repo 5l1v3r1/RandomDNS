@@ -288,8 +288,20 @@ class Core {
         // Rotate the provider in a predefined time
         if(cli.rotationTime !== 0) {
           let rotateServer = setTimeout(() => {
-            process.kill(childProcess.pid);
-            childProcess = null;
+
+            // Check if childProcess is not undefined
+            if((typeof childProcess !== 'undefined')) {
+
+              // Check if childProcess var has not been already nulled / if there is still a pid
+              if((childProcess !== null) &&
+                (childProcess.pid !== null)) {
+
+                // Kill the process
+                process.kill(childProcess.pid);
+                childProcess = null;
+              }
+            }
+
           }, (cli.rotationTime * 1000));
         }
 
