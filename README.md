@@ -23,7 +23,7 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 #### How to use it
 
 1. Update Brew: ```brew update && brew upgrade```
-2. Install DNSCrypt + EdgeDNS + Node + NPM: ```brew install dnscrypt-proxy edgedns node npm```
+2. Install DNSCrypt + Node + NPM: ```brew install dnscrypt-proxy node npm```
 3. Download and run RandomDNS: ```npm install -g randomdns && sudo DEBUG=* randomdns```
 4. Set your DNS settings to 127.0.0.1
 

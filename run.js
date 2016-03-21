@@ -49,7 +49,7 @@ class Core {
       .usage('[options] [file]')
       .option('-L, --listenOn [string]', 'Listen on a specific interface/port [default: 127.0.0.1:53]', '127.0.0.1:53')
       .option('-R, --rotationTime [int]', 'Define the time to wait before rotating the server (in seconds) [default: 600 seconds, 0: disabled]', 600)
-      .option('-P, --reverseProxy [bool]', 'Enable EdgeDNS reverse proxy [default: false]', false)
+      .option('-P, --reverseProxy [bool]', 'Enable EdgeDNS reverse proxy [default: false]', false) // Set to false as EdgeDNS is not available yet
       .option('--reverseProxyChildStartPort [int]', 'Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]', 51000)
       .option('-T, --threads [int]', 'Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]', 4)
       //.option('-S, --scramble [bool]', 'Scramble your DNS traffic by resolving fake queries [default: true]', true)
