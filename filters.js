@@ -27,7 +27,7 @@
 const cli           = require('commander'),
       defines       = require('./defines'),
       debug         = require('debug'),
-      coreDebug     = debug('filters');
+      filtersDebug  = debug('filters');
 
 class Filters {
 
@@ -55,14 +55,14 @@ class Filters {
         }
 
         // Pattern found, send the server list to the filter
-        coreDebug(`Sending datas to "${filter}"...`);
+        filtersDebug(`Sending datas to "${filter}"...`);
         serverList = filterObject[1](serverList, userFilters[filter])
           .filter((a) => { return typeof a !== 'undefined'; }); // Remove empty (deleted) values with JS filter() function
 
         continue;
       }
 
-      coreDebug(`Skipping unknown "${filter}" filter.`);
+      filtersDebug(`Skipping unknown "${filter}" filter.`);
     }
 
     return serverList;
