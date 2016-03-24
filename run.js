@@ -45,7 +45,7 @@ class Core {
       .option('-b, --binaryEdgeDNSFile [string]', 'Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.', '/Users/sabri/Desktop/edgedns')
       .option('--binaryEdgeDNSFileSignature [string]', 'SHA512 hash of the EdgeDNS binary.', '59bc3da17f5ae2d7c69a48b92a69fb3556155fbffc27394d34dc376dcbf175c6790bd2bb5cc4c9825198c449c113f8735b29d7f42c6103c3941b108bb81af99b')
       .option('-r, --resolverListFile [string]', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
-      .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', '43b3000ce24390314b137109c85c4cf72b6d26e3269029e28d2beb0e1cb6c2b06725fff3858e86e7726a0cc6ed4152fb670d62cc3fa8610b609c22b9b68af273')
+      .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', '70337674b0b7b811fa1cf74aea7b865a4f9411f4f39546d5264b964b4e38e1978ea10d2568167402b0dbfe97bee15b661ba548b7d145cb10a5779228e90f6953')
     .parse(process.argv);
 
     // Hashes of external files
