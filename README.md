@@ -61,4 +61,4 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 ##### ToDo
 
 - Add filters: by country, by port
-- Scramble monitoring of DNS traffic by sending fake DNS requests randomly
+- Scramble monitoring of DNS traffic by sending fake DNS requests periodically and randomly. The main idea would be to retrieve the 1 million top websites of Alexa and then resolve subdomains by using subbrute subdomain list. Full database might be hosted as gzip(JSON(domain names)) on a CDN and hash on GitHub.
