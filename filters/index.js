@@ -10,14 +10,14 @@
 "use strict";
 
 const cli           = require('commander'),
-      defines       = require('./defines'),
+      defines       = require('../defines'),
       debug         = require('debug'),
       filtersDebug  = debug('filters');
 
 class Filters {
 
   get() {
-    return require('./filters/formulas')(defines);
+    return require('./formulas')(defines);
   }
 
   apply(serverList) {
