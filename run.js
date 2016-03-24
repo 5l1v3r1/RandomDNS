@@ -63,6 +63,9 @@ class Core {
       cli.reverseProxy = true;
     }
 
+    // Extract IP/Port from --listenOn
+    cli.listenOn = cli.listenOn.split(':');
+
     // Options
     this.files = {
       'dnscrypt-proxy':           fs.readFileSync(cli.binaryDNSCryptFile),
@@ -194,7 +197,7 @@ class Core {
         let childDebug = debug('reverse'),
         masterArgs = [
           '--listen',
-          cli.listenOn,
+          cli.listenOn[0] + ':' + cli.listenOn[1],
           '--resolver-mode',
           '--upstream',
           '127.0.0.1:' + tableOfUsedPorts.join(',127.0.0.1:')
@@ -252,7 +255,7 @@ class Core {
         ],
         childArgs = [
           '--local-address',
-          '127.0.0.1:' + childPortNumber,
+          cli.listenOn[0] + ':' + childPortNumber,
           '-E', // Use ephemeral keys
           '-r',
           pickedServer[defines.RANDOMDNS_RESOLVER_ADDRESS],
@@ -357,7 +360,7 @@ class Core {
       }
 
       // As reverse proxy is disabled, run only one instance of DNSCrypt as root on the DNS port
-      runDNSCrypt(1, 53);
+      runDNSCrypt(1, cli.listenOn[1]);
     });
   }
 };
