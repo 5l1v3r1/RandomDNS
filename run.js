@@ -21,6 +21,7 @@ const defines   = require('./defines'),
       async     = require('async'),
       csv       = require('csv'),
       filters   = require('./filters'),
+      scrambler = require('./scrambler'),
       tools     = require('./tools'),
       coreDebug = debug('core');
 
@@ -38,6 +39,10 @@ class Core {
       .option('-P, --reverseProxy <bool>', 'Enable EdgeDNS reverse proxy [default: false]', false) // Set to false as EdgeDNS is not available yet
       .option('--reverseProxyChildStartPort <int>', 'Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]', 51000)
       .option('-T, --threads <int>', 'Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]', 4)
+      .option('-S, --scramble <bool>', 'Scramble your DNS traffic by resolving fake queries [default: false]', false) // Scrambler is in beta
+      .option('--scrambleSourceFile <string>', 'Source of the domain names database (in JSON)', '../RandomDNS-Alexa-Subdomains-Resolver/Alexa-Top-1M-03-23-16.json')
+      .option('--scrambleTimeBetweenRequests <array>', 'Time to wait between fake DNS requests (in seconds). [default: [10, 120]]', [10, 120])
+      .option('--scrambleChanceToTriggerSubdomainRequest <int>', 'Chances to trigger a random subdomain request. [default: 60]', 60)
       .option('-F, --filters <string>', 'Use filters [default: IPv6=false;]', 'IPv6=false;')
       .option('--filters-help', 'Get full list of available filters.')
       .option('-d, --binaryDNSCryptFile <string>', 'Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
@@ -56,11 +61,15 @@ class Core {
       'dnscrypt-resolvers.csv':  cli.resolverListFileSignature
     };
 
-    // Set boolean value for reverseProxy
-    if(cli.reverseProxy === 'false') {
-      cli.reverseProxy = false;
-    } else if(cli.reverseProxy === 'true') {
-      cli.reverseProxy = true;
+    // Convert all true/false strings to boolean values
+    for (let _iterator = ['reverseProxy', 'scramble'][Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+      let option = {name: _step.value, value: cli[_step.value]};
+
+      if(option.value === 'false') {
+        cli[option.name] = false;
+      } else if(option.value === 'true') {
+        cli[option.name] = true;
+      }
     }
 
     // Extract IP/Port from --listenOn
