@@ -30,22 +30,23 @@ class Core {
 
     // Splash
     console.log(new Buffer('DQogICBfX18gICAgICAgICAgICAgICBfXyAgICAgICAgICAgX19fICBfICBfX19fX18NCiAgLyBfIFxfX18gX19fXyAgX19fLyAvX18gIF9fIF8gIC8gXyBcLyB8LyAvIF9fLw0KIC8gLCBfLyBfIGAvIF8gXC8gXyAgLyBfIFwvICAnIFwvIC8vIC8gICAgL1wgXCAgDQovXy98X3xcXyxfL18vL18vXF8sXy9cX19fL18vXy9fL19fX18vXy98Xy9fX18vICANCg==', 'base64').toString('ascii'));
+
+    // Commands
     cli.version(require('./package.json').version)
-      .usage('[options] [file]')
-      .option('-L, --listenOn [string]', 'Listen on a specific interface/port [default: 127.0.0.1:53]', '127.0.0.1:53')
-      .option('-R, --rotationTime [int]', 'Define the time to wait before rotating the server (in seconds) [default: 600, 0: disabled]', 600)
-      .option('-P, --reverseProxy [bool]', 'Enable EdgeDNS reverse proxy [default: false]', false) // Set to false as EdgeDNS is not available yet
-      .option('--reverseProxyChildStartPort [int]', 'Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]', 51000)
-      .option('-T, --threads [int]', 'Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]', 4)
-      //.option('-S, --scramble [bool]', 'Scramble your DNS traffic by resolving fake queries [default: true]', true)
-      .option('-F, --filters [string]', 'Use filters [default: IPv6=false;]', 'IPv6=false;')
+      .option('-L, --listenOn <string>', 'Listen on a specific interface/port [default: 127.0.0.1:53]', '127.0.0.1:53')
+      .option('-R, --rotationTime <int>', 'Define the time to wait before rotating the server (in seconds) [default: 600, 0: disabled]', 600)
+      .option('-P, --reverseProxy <bool>', 'Enable EdgeDNS reverse proxy [default: false]', false) // Set to false as EdgeDNS is not available yet
+      .option('--reverseProxyChildStartPort <int>', 'Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]', 51000)
+      .option('-T, --threads <int>', 'Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]', 4)
+      .option('-F, --filters <string>', 'Use filters [default: IPv6=false;]', 'IPv6=false;')
       .option('--filters-help', 'Get full list of available filters.')
-      .option('-d, --binaryDNSCryptFile [string]', 'Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
-      .option('--binaryDNSCryptFileSignature [string]', 'SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
-      .option('-e, --binaryEdgeDNSFile [string]', 'Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.', '/Users/sabri/Desktop/edgedns')
-      .option('--binaryEdgeDNSFileSignature [string]', 'SHA512 hash of the EdgeDNS binary.', '59bc3da17f5ae2d7c69a48b92a69fb3556155fbffc27394d34dc376dcbf175c6790bd2bb5cc4c9825198c449c113f8735b29d7f42c6103c3941b108bb81af99b')
-      .option('-r, --resolverListFile [string]', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
-      .option('--resolverListFileSignature [string]', 'SHA512 hash of the DNSCrypt resolver list file.', '70337674b0b7b811fa1cf74aea7b865a4f9411f4f39546d5264b964b4e38e1978ea10d2568167402b0dbfe97bee15b661ba548b7d145cb10a5779228e90f6953')
+      .option('-d, --binaryDNSCryptFile <string>', 'Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
+      .option('--binaryDNSCryptFileSignature <string>', 'SHA512 hash of the DNSCrypt binary.', '3bd6f8d51e9c776ff637c23c50813dedc5ff9ccefb15c30bf084212b09a828161f068ffb0f009396350f3da217306633cc06e554fae25c07834f32bb07196582')
+      .option('-e, --binaryEdgeDNSFile <string>', 'Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.', '/Users/sabri/Desktop/edgedns')
+      .option('--binaryEdgeDNSFileSignature <string>', 'SHA512 hash of the EdgeDNS binary.', '59bc3da17f5ae2d7c69a48b92a69fb3556155fbffc27394d34dc376dcbf175c6790bd2bb5cc4c9825198c449c113f8735b29d7f42c6103c3941b108bb81af99b')
+      .option('-r, --resolverListFile <string>', 'Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.', path.resolve(__dirname, 'dnscrypt-proxy/dnscrypt-resolvers.csv'))
+      .option('--resolverListFileSignature <string>', 'SHA512 hash of the DNSCrypt resolver list file.', '70337674b0b7b811fa1cf74aea7b865a4f9411f4f39546d5264b964b4e38e1978ea10d2568167402b0dbfe97bee15b661ba548b7d145cb10a5779228e90f6953')
+      .usage('randomdns [options]')
     .parse(process.argv);
 
     // Hashes of external files
@@ -89,7 +90,7 @@ class Core {
     try {
 
       // Check if the program is run as root
-      assert(tools.isRoot(), 'Sorry but you must run this program as root so I use the DNS port.');
+      assert(tools.isRoot(), 'Sorry but you must run this program as root so I can use the DNS port.');
 
       // Ensure integrity of files
       for (let _iterator = ['dnscrypt-proxy', 'dnscrypt-resolvers.csv', 'edgedns'][Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
