@@ -89,7 +89,7 @@ class Core {
     try {
 
       // Check if the program is run as root
-      assert(tools.isRoot(), 'Sorry but you must run this program as root so I can run dnscrypt-proxy on the DNS port.');
+      assert(tools.isRoot(), 'Sorry but you must run this program as root so I use the DNS port.');
 
       // Ensure integrity of files
       for (let _iterator = ['dnscrypt-proxy', 'dnscrypt-resolvers.csv', 'edgedns'][Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
@@ -184,7 +184,7 @@ class Core {
       }
 
       // List number of available servers
-      coreDebug(`${result.length} servers are available. Picking one...`);
+      coreDebug(`${result.length} servers are available.`);
 
       // Instances functions
       const spawn = require('child_process').spawn,
