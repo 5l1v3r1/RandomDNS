@@ -40,7 +40,7 @@ class Core {
       .option('--reverseProxyChildStartPort <int>', 'Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]', 51000)
       .option('-T, --threads <int>', 'Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]', 4)
       .option('-S, --scramble <bool>', 'Scramble your DNS traffic by resolving fake queries [default: false]', false) // Scrambler is in beta
-      .option('--scrambleSourceFile <string>', 'Source of the domain names database (in JSON)', '../RandomDNS-Alexa-Subdomains-Resolver/Alexa-Top-1M-03-23-16.json')
+      .option('--scrambleSourceFile <string>', 'Absolute path to the domain names database (RandomDNS-compatible) [default: download and use latest Alexa-Top-1M-Websites-*-noSubdomains.json]', false)
       .option('--scrambleTimeBetweenRequests <array>', 'Time to wait between fake DNS requests (in seconds). [default: [10, 120]]', [10, 120])
       .option('--scrambleChanceToTriggerSubdomainRequest <int>', 'Chances to trigger a random subdomain request. [default: 60]', 60)
       .option('-F, --filters <string>', 'Use filters [default: IPv6=false;]', 'IPv6=false;')
