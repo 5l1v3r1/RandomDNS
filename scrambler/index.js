@@ -98,7 +98,7 @@ class Scrambler {
     });
   }
 
-  downloadDatabase() {
+  downloadDatabase(callback) {
 
     let that = this,
         endPoint = 'https://s3.amazonaws.com/alexa-static/top-1m.csv.zip',
@@ -138,7 +138,7 @@ class Scrambler {
                 fs.writeFileSync(cli.scrambleSourceFile, convertedDatasJSON, 'utf8');
 
                 scramblerDownloaderDebug('[5/5] Done! Scrambler is starting right now!');
-                that.run(convertedDatasJSON);
+                callback(convertedDatasJSON);
               });
       });
   }
