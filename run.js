@@ -21,7 +21,6 @@ const defines   = require('./defines'),
       async     = require('async'),
       csv       = require('csv'),
       filters   = require('./filters'),
-      scrambler = require('./scrambler'),
       tools     = require('./tools'),
       coreDebug = debug('core');
 
@@ -39,10 +38,11 @@ class Core {
       .option('-P, --reverseProxy <bool>', 'Enable EdgeDNS reverse proxy [default: false]', false) // Set to false as EdgeDNS is not available yet
       .option('--reverseProxyChildStartPort <int>', 'Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]', 51000)
       .option('-T, --threads <int>', 'Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]', 4)
-      .option('-S, --scramble <bool>', 'Scramble your DNS traffic by resolving fake queries [default: false]', false) // Scrambler is in beta
-      .option('--scrambleSourceFile <string>', 'Absolute path to the domain names database (RandomDNS-compatible) [default: download and use latest Alexa-Top-1M-Websites-*-noSubdomains.json]', false)
-      .option('--scrambleTimeBetweenRequests <array>', 'Time to wait between fake DNS requests (in seconds). [default: [10, 120]]', [10, 120])
-      .option('--scrambleChanceToTriggerSubdomainRequest <int>', 'Chances to trigger a random subdomain request. [default: 60]', 60)
+      .option('-S, --scramble <bool>', 'Scramble your DNS traffic by resolving fake queries [default: false]', false) // scrambler is in beta
+      .option('--scrambleSourceFile <string>', 'Absolute path to the domain names database (RandomDNS-compatible) [default: download and use latest Alexa Top 1 Million Websites]', path.resolve(__dirname, 'websites-database.json'))
+      .option('--scrambleTimeBetweenRequestsMin <int>', 'Minimum time to wait between fake DNS requests (in seconds). [default: 1]', 1)
+      .option('--scrambleTimeBetweenRequestsMax <int>', 'Maximum time to wait between fake DNS requests (in seconds). [default: 60]', 60)
+      //.option('--scrambleChanceToTriggerSubdomainRequest <int>', 'Chances to trigger a random subdomain request (in percent). [default: 60]', 60)
       .option('-F, --filters <string>', 'Use filters [default: IPv6=false;]', 'IPv6=false;')
       .option('--filters-help', 'Get full list of available filters.')
       .option('-d, --binaryDNSCryptFile <string>', 'Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.', '/usr/local/opt/dnscrypt-proxy/sbin/dnscrypt-proxy')
@@ -103,6 +103,23 @@ class Core {
 
       // Check if the program is run as root
       assert(tools.isRoot(), 'Sorry but you must run this program as root so I can use the DNS port.');
+
+      // Scrambler init
+      if(cli.scramble) {
+        const scrambler = require('./scrambler');
+        try {
+          // Ensure the file exist
+          fs.accessSync(cli.scrambleSourceFile, fs.F_OK);
+
+          // Run the scrambler plugin
+          scrambler.run();
+        } catch (e) {
+          // Download Alexa database asynchronously if the file does not exist then run the scrambler
+          scrambler.downloadDatabase((domains) => {
+            scrambler.run(domains);
+          });
+        }
+      }
 
       // Ensure integrity of files
       for (let _iterator = ['dnscrypt-proxy', 'dnscrypt-resolvers.csv', 'edgedns'][Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
@@ -218,7 +235,7 @@ class Core {
           childDebug(`EdgeDNS proxy exited with code ${code}! Restarting...`);
 
           setTimeout(() => {
-            return runEdgeDNS(tableOfUsedPorts);
+            runEdgeDNS(tableOfUsedPorts);
           }, 2500);
         });
 

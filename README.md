@@ -45,29 +45,29 @@ More informations at [https://dnscrypt.org/](https://dnscrypt.org/)
 /_/|_|\_,_/_//_/\_,_/\___/_/_/_/____/_/|_/___/  
 
 
-  Usage: run randomdns [options]
+Usage: run randomdns [options]
 
-  Options:
+Options:
 
-    -h, --help                                       output usage information
-    -V, --version                                    output the version number
-    -L, --listenOn <string>                          Listen on a specific interface/port [default: 127.0.0.1:53]
-    -R, --rotationTime <int>                         Define the time to wait before rotating the server (in seconds) [default: 600, 0: disabled]
-    -P, --reverseProxy <bool>                        Enable EdgeDNS reverse proxy [default: false]
-    --reverseProxyChildStartPort <int>               Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]
-    -T, --threads <int>                              Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]
-    -S, --scramble <bool>                            Scramble your DNS traffic by resolving fake queries [default: false]
-    --scrambleSourceFile <string>                    Absolute path to the domain names database (RandomDNS-compatible) [default: download and use latest Alexa-Top-1M-Websites-*-withSubdomains.json]
-    --scrambleTimeBetweenRequests <array>            Time to wait between fake DNS requests (in seconds). [default: [10, 120]]
-    --scrambleChanceToTriggerSubdomainRequest <int>  Chances to trigger a random subdomain request. [default: 60]
-    -F, --filters <string>                           Use filters [default: IPv6=false;]
-    --filters-help                                   Get full list of available filters.
-    -d, --binaryDNSCryptFile <string>                Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.
-    --binaryDNSCryptFileSignature <string>           SHA512 hash of the DNSCrypt binary.
-    -e, --binaryEdgeDNSFile <string>                 Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.
-    --binaryEdgeDNSFileSignature <string>            SHA512 hash of the EdgeDNS binary.
-    -r, --resolverListFile <string>                  Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
-    --resolverListFileSignature <string>             SHA512 hash of the DNSCrypt resolver list file.
+  -h, --help                              output usage information
+  -V, --version                           output the version number
+  -L, --listenOn <string>                 Listen on a specific interface/port [default: 127.0.0.1:53]
+  -R, --rotationTime <int>                Define the time to wait before rotating the server (in seconds) [default: 600, 0: disabled]
+  -P, --reverseProxy <bool>               Enable EdgeDNS reverse proxy [default: false]
+  --reverseProxyChildStartPort <int>      Where childrens (dnscrypt-proxy processes) should start incrementing the port? (will work only if reverseProxy is enabled) [default: 51000]
+  -T, --threads <int>                     Number of childs to spawn, set to 1 to disable load balacing (will work only if reverseProxy is enabled) [default: 4]
+  -S, --scramble <bool>                   Scramble your DNS traffic by resolving fake queries [default: false]
+  --scrambleSourceFile <string>           Absolute path to the domain names database (RandomDNS-compatible) [default: download and use latest Alexa Top 1 Million Websites]
+  --scrambleTimeBetweenRequestsMin <int>  Minimum time to wait between fake DNS requests (in seconds). [default: 1]
+  --scrambleTimeBetweenRequestsMax <int>  Maximum time to wait between fake DNS requests (in seconds). [default: 60]
+  -F, --filters <string>                  Use filters [default: IPv6=false;]
+  --filters-help                          Get full list of available filters.
+  -d, --binaryDNSCryptFile <string>       Use custom DNSCrypt binary, will not work until --binaryDNSCryptFileSignature is changed.
+  --binaryDNSCryptFileSignature <string>  SHA512 hash of the DNSCrypt binary.
+  -e, --binaryEdgeDNSFile <string>        Use custom EdgeDNS binary, will not work until --binaryEdgeDNSFileSignature is changed.
+  --binaryEdgeDNSFileSignature <string>   SHA512 hash of the EdgeDNS binary.
+  -r, --resolverListFile <string>         Use custom DNSCrypt resolver list file, will not work until --resolverListFileSignature is changed.
+  --resolverListFileSignature <string>    SHA512 hash of the DNSCrypt resolver list file.
 
 ```
 
